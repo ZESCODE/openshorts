@@ -147,11 +147,11 @@ export function renderNav({ lang = 'en', signedIn = false, showLogin = true } = 
  * neither Tailwind nor each other's variables. */
 export const NAV_CSS = `
 .osn{position:sticky;top:0;z-index:50;background:oklch(12% 0.02 258);border-bottom:1px solid oklch(96% 0.006 262 / .08);
-  font-family:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:.875rem;line-height:1.4}
+  font-family:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:.875rem;line-height:1.4}
 .osn *{box-sizing:border-box}
 .osn a{text-decoration:none}
 .osn-bar{max-width:72rem;margin:0 auto;padding:0 1.5rem;height:4rem;display:flex;align-items:center;gap:1.5rem;position:relative}
-.osn-brand{display:flex;align-items:center;gap:.6rem;font-family:"Instrument Serif",ui-serif,Georgia,serif;font-size:1.25rem;
+.osn-brand{display:flex;align-items:center;gap:.6rem;font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-size:1.25rem;
   letter-spacing:-.01em;color:oklch(96% 0.006 262);text-transform:lowercase;white-space:nowrap;flex-shrink:0}
 .osn-brand img{width:28px;height:28px;display:block}
 .osn-menu{flex:1;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;min-width:0}

@@ -30,8 +30,8 @@ const CSS = `
   --ink:oklch(96% 0.006 262);--ink2:oklch(86% 0.01 262);--muted:oklch(64% 0.012 262);
   --rule:oklch(96% 0.006 262 / .08);--rule2:oklch(96% 0.006 262 / .14);
   --brass:oklch(64% 0.19 258);--ok:oklch(75% 0.11 150);
-  --display:"Instrument Serif",ui-serif,Georgia,serif;
-  --body:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,monospace;
 }
 *{box-sizing:border-box}

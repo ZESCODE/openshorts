@@ -23,8 +23,8 @@ import { renderNav, NAV_CSS, NAV_SCRIPT } from './nav.js'
 
 const S = {
   wrap: 'max-width:72rem;margin:0 auto;padding:0 1.5rem',
-  h1: 'font-family:\'Instrument Serif\',ui-serif,Georgia,serif;font-weight:400;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.06;letter-spacing:-.03em;color:oklch(96% 0.006 262);margin:0 0 1.25rem;text-transform:lowercase',
-  h2: 'font-family:\'Instrument Serif\',ui-serif,Georgia,serif;font-weight:400;font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.15;letter-spacing:-.02em;color:oklch(96% 0.006 262);margin:0 0 1rem;text-transform:lowercase',
+  h1: 'font-family:\'Space Grotesk\',ui-sans-serif,system-ui,sans-serif;font-weight:400;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.06;letter-spacing:-.03em;color:oklch(96% 0.006 262);margin:0 0 1.25rem;text-transform:lowercase',
+  h2: 'font-family:\'Space Grotesk\',ui-sans-serif,system-ui,sans-serif;font-weight:400;font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.15;letter-spacing:-.02em;color:oklch(96% 0.006 262);margin:0 0 1rem;text-transform:lowercase',
   h3: 'font-size:1rem;font-weight:600;color:oklch(96% 0.006 262);margin:0 0 .35rem',
   p: 'margin:0 0 1rem;color:oklch(86% 0.01 262);line-height:1.65',
   muted: 'margin:0 0 1rem;color:oklch(64% 0.012 262);line-height:1.65',
@@ -166,7 +166,7 @@ const platformCard = ([title, body, links]) =>
 const card = (title, body) =>
   `<div style="${S.card}"><h3 style="${S.h3}">${title}</h3><p style="margin:0;color:oklch(64% 0.012 262);font-size:.9rem;line-height:1.6">${body}</p></div>`
 
-export const LANDING_FALLBACK = `<div id="seo-content" style="background:oklch(12% 0.02 258);color:oklch(86% 0.01 262);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;line-height:1.65">
+export const LANDING_FALLBACK = `<div id="seo-content" style="background:oklch(12% 0.02 258);color:oklch(86% 0.01 262);font-family:'Inter',ui-sans-serif,system-ui,sans-serif;line-height:1.65">
 <style>${NAV_CSS}</style>
 ${renderNav()}
 ${NAV_SCRIPT}
