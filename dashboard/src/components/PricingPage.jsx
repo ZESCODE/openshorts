@@ -55,7 +55,7 @@ const FAQS = [
   },
   {
     question: "How much does it cost to generate an AI UGC video?",
-    answer: "Clipping AI itself is free, but the AI Shorts feature uses external APIs that charge per use: Pollinations for the actor images and the video generation, ElevenLabs for the voiceover. Pollinations bills the pollen balance on your own account, so a video costs whatever those models charge for one Flux actor image, a few b-roll stills and 5-15 seconds of video per talking-head chunk. Both modes are still far cheaper than hiring UGC creators ($50-500 per video) or using platforms like HeyGen ($24-180/month)."
+    answer: "Clipping AI itself is free, but the AI Shorts feature uses external APIs that charge per use: Pollinations for the actor images and the video generation, ElevenLabs for the voiceover. Pollinations bills its pollen balance at $1 per pollen, so a video costs about $0.65 (0.65 pollen) in Low Cost mode and about $2 (2 pollen) in Premium. Both modes are still far cheaper than hiring UGC creators ($50-500 per video) or using platforms like HeyGen ($24-180/month)."
   },
   {
     question: "Does API and MCP access cost extra?",

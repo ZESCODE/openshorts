@@ -469,7 +469,7 @@ export default function Landing({ onLaunchApp }) {
     {
       icon: Sparkles,
       title: "AI UGC Video Generator",
-      description: "AI writes the script and generates a lip-synced avatar video — from $0.65/video."
+      description: "AI writes the script and generates a lip-synced avatar video — from $0.65 (0.65 pollen)/video."
     },
     {
       icon: FileVideo,
@@ -525,7 +525,7 @@ export default function Landing({ onLaunchApp }) {
     },
     {
       question: "What is the AI UGC Video Generator?",
-      answer: "Clipping AI includes an AI UGC (User Generated Content) video creator that generates marketing videos with AI actors for any product or business. You describe your product or paste a website URL — the AI writes a viral script, generates a realistic AI actor with lip-synced voiceover, adds b-roll visuals and TikTok-style subtitles, with the hook spoken in the first seconds. The result is a ready-to-post vertical video for TikTok, Instagram Reels, or YouTube Shorts. Two cost modes: Low Cost (~$0.65/video using Hailuo + VEED Lipsync) and Premium (~$2/video using Kling Avatar v2)."
+      answer: "Clipping AI includes an AI UGC (User Generated Content) video creator that generates marketing videos with AI actors for any product or business. You describe your product or paste a website URL — the AI writes a viral script, generates a realistic AI actor with lip-synced voiceover, adds b-roll visuals and TikTok-style subtitles, with the hook spoken in the first seconds. The result is a ready-to-post vertical video for TikTok, Instagram Reels, or YouTube Shorts. Two cost modes: Low Cost (about $0.65 / 0.65 pollen per video) and Premium (about $2 / 2 pollen)."
     },
     {
       question: "Can I use the AI UGC Video Generator for any type of business?",
@@ -533,7 +533,7 @@ export default function Landing({ onLaunchApp }) {
     },
     {
       question: "How much does it cost to generate an AI UGC video?",
-      answer: "Clipping AI itself is free, but the AI Shorts feature uses external APIs that charge per use: Pollinations for the actor images and the video generation, ElevenLabs for the voiceover. Pollinations bills the pollen balance on your own account, so a video costs whatever those models charge for one Flux actor image, a few b-roll stills and 5-15 seconds of video per talking-head chunk. Both modes are still far cheaper than hiring UGC creators ($50-500 per video) or using platforms like HeyGen ($24-180/month)."
+      answer: "Clipping AI itself is free, but the AI Shorts feature uses external APIs that charge per use: Pollinations for the actor images and the video generation, ElevenLabs for the voiceover. Pollinations bills its pollen balance at $1 per pollen, so a video costs about $0.65 (0.65 pollen) in Low Cost mode and about $2 (2 pollen) in Premium. Both modes are still far cheaper than hiring UGC creators ($50-500 per video) or using platforms like HeyGen ($24-180/month)."
     },
     {
       question: "What AI does Clipping AI use for viral moment detection?",
@@ -980,7 +980,7 @@ export default function Landing({ onLaunchApp }) {
               },
               {
                 title: "Businesses & Brands",
-                description: "UGC-style marketing videos with AI actors — from $0.65 per video.",
+                description: "UGC-style marketing videos with AI actors — from $0.65 (0.65 pollen) per video.",
                 icon: Sparkles
               }
             ].map((useCase, i) => (
@@ -1007,7 +1007,7 @@ export default function Landing({ onLaunchApp }) {
               <h3 className="font-display text-2xl lowercase text-ink mb-2">AI Shorts</h3>
               <p className="text-muted text-sm leading-relaxed mb-4">UGC marketing videos with AI actors for any business.</p>
               <ul className="space-y-1.5">
-                {['AI actor generation + lip-sync', 'B-roll + TikTok-style subtitles', 'From $0.65 per video'].map((f, i) => (
+                {['AI actor generation + lip-sync', 'B-roll + TikTok-style subtitles', 'From $0.65 (0.65 pollen) per video'].map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-xs text-muted"><Check size={12} className="text-ok shrink-0" />{f}</li>
                 ))}
               </ul>
@@ -1102,8 +1102,8 @@ export default function Landing({ onLaunchApp }) {
                       <Zap size={18} className="text-brass" />
                     </div>
                     <h3 className="font-display text-xl lowercase text-ink mb-1">Pollinations API</h3>
-                    <div className="mb-3"><span className="badge-ok">Pay-per-use from $0.04</span></div>
-                    <p className="text-muted text-sm leading-relaxed">Powers AI Shorts: generates AI actor images (Flux), talking head videos (Hailuo/Kling), and lip-sync (VEED). Required only for the AI UGC video generator.</p>
+                    <div className="mb-3"><span className="badge-ok">Pay-per-use from $0.04 (0.04 pollen)</span></div>
+                    <p className="text-muted text-sm leading-relaxed">Powers AI Shorts: generates AI actor images (Flux) and audio-driven talking head videos. Required only for the AI UGC video generator.</p>
                   </div>
                   <div className="card p-6 relative">
                     <span className="readout absolute top-4 right-4 border border-rule rounded-full px-2.5 py-1">AI Shorts</span>

@@ -436,8 +436,8 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, pollinations
                       <span className={`text-sm font-medium lowercase ${videoMode === 'lowcost' ? 'text-ink' : 'text-ink2'}`}>Low Cost</span>
                       <span className="badge-ok">recommended</span>
                     </div>
-                    <p className="readout mb-1.5">~$0.80 / VIDEO</p>
-                    <p className="text-xs text-muted leading-relaxed">Hailuo 2.3 img2video + VEED Lipsync. Good movement + lip-sync.</p>
+                    <p className="readout mb-1.5">~$0.65 / 0.65 pollen</p>
+                    <p className="text-xs text-muted leading-relaxed">Pollinations Seedance 2.0, audio-driven. Good movement and lip-sync.</p>
                   </button>
                   <button
                     onClick={() => setVideoMode('premium')}
@@ -449,8 +449,8 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, pollinations
                       <span className={`text-sm font-medium lowercase ${videoMode === 'premium' ? 'text-ink' : 'text-ink2'}`}>Premium</span>
                       <span className="badge-brass">best quality</span>
                     </div>
-                    <p className="readout mb-1.5">~$2.00 / VIDEO</p>
-                    <p className="text-xs text-muted leading-relaxed">Kling Avatar v2 Standard. Full integrated movement.</p>
+                    <p className="readout mb-1.5">~$2.00 / 2 pollen</p>
+                    <p className="text-xs text-muted leading-relaxed">Pollinations mini-max H3. Full audio-driven movement at 1080p.</p>
                   </button>
                 </div>
               </div>
@@ -1094,22 +1094,21 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, pollinations
               <div className="card p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="eyebrow">Estimated Cost</span>
-                  <span className="readout text-ink">~${videoMode === 'lowcost' ? '0.65' : '2.50'}</span>
+                  <span className="readout text-ink">~${videoMode === 'lowcost' ? '$0.65 · 0.65' : '$2.00 · 2'} pollen</span>
                 </div>
                 <div className="space-y-1">
                   {(videoMode === 'lowcost'
                     ? [
-                        ['Flux image', '$0.05'],
-                        ['ElevenLabs voice', '$0.10'],
-                        ['Hailuo 2.3 img2video', '$0.19'],
-                        ['VEED Lipsync', '$0.20'],
-                        ['Flux b-roll', '$0.10'],
+                        ['Flux image', '$0.05 · 0.05'],
+                        ['ElevenLabs voice', '$0.10 · 0.1'],
+                        ['Seedance 2.0 talking head', '$0.40 · 0.4'],
+                        ['Flux b-roll', '$0.10 · 0.1'],
                       ]
                     : [
-                        ['Flux image', '$0.05'],
-                        ['ElevenLabs voice', '$0.10'],
-                        ['Kling avatar', '$1.69'],
-                        ['Kling b-roll', '$0.70'],
+                        ['Flux image', '$0.05 · 0.05'],
+                        ['ElevenLabs voice', '$0.10 · 0.1'],
+                        ['mini-max H3 talking head', '$1.75 · 1.75'],
+                        ['Flux b-roll', '$0.10 · 0.1'],
                       ]
                   ).map(([item, cost]) => (
                     <div key={item} className="flex items-center justify-between readout">
