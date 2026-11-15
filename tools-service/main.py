@@ -80,6 +80,22 @@ async def diag() -> dict:
                                "chars": len(r.text)}
     except Exception as exc:  # noqa: BLE001
         out["generate_big"] = {"error": type(exc).__name__, "ms": int((time.time() - started) * 1000)}
+
+    started = time.time()
+    try:
+        import google.genai as genai
+
+        out["sdk_version"] = getattr(genai, "__version__", "?")
+        client = genai.Client(api_key=key)
+        resp = client.models.generate_content(
+            model=model,
+            contents="Reply with the single word ok",
+            config={"max_output_tokens": 64},
+        )
+        out["sdk"] = {"ms": int((time.time() - started) * 1000), "text": (resp.text or "")[:40]}
+    except Exception as exc:  # noqa: BLE001
+        out["sdk"] = {"error": f"{type(exc).__name__}: {exc}"[:200],
+                      "ms": int((time.time() - started) * 1000)}
     return out
 
 
