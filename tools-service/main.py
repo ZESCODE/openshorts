@@ -57,6 +57,29 @@ async def diag() -> dict:
                            "body": r.text[:160]}
     except Exception as exc:  # noqa: BLE001
         out["generate"] = {"error": type(exc).__name__, "ms": int((time.time() - started) * 1000)}
+
+    started = time.time()
+    try:
+        prompt = free_tools.build_prompt(
+            "titles", "How I built a clipper that turns long videos into shorts", "", "creators"
+        )
+        r = await httpx.AsyncClient(timeout=120).post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+            headers={"x-goog-api-key": key, "Content-Type": "application/json"},
+            json={
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "responseMimeType": "application/json",
+                    "maxOutputTokens": 6000,
+                    "temperature": 0.9,
+                    "thinkingConfig": {"thinkingLevel": "low"},
+                },
+            },
+        )
+        out["generate_big"] = {"status": r.status_code, "ms": int((time.time() - started) * 1000),
+                               "chars": len(r.text)}
+    except Exception as exc:  # noqa: BLE001
+        out["generate_big"] = {"error": type(exc).__name__, "ms": int((time.time() - started) * 1000)}
     return out
 
 
