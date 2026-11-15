@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Upload, Sparkles, Youtube, Instagram, Share2, ChevronDown, Check, Activity, LayoutDashboard, Settings, Plus, History, X, Terminal, Shield, LayoutGrid, Image, Globe, RotateCcw, Calendar, AlertTriangle, KeyRound, Bot, Users, Smartphone, ExternalLink, Copy, CheckCircle2, Mail, Loader2, Download, Menu, Lock, Rocket } from 'lucide-react';
+import { Upload, Sparkles, Youtube, Instagram, Share2, ChevronDown, Check, Activity, LayoutDashboard, Settings, Plus, History, X, Terminal, Shield, LayoutGrid, Image, Globe, RotateCcw, Calendar, AlertTriangle, KeyRound, Bot, Users, Smartphone, ExternalLink, Copy, CheckCircle2, Mail, Loader2, Download, Menu, Lock, Rocket, Film, Send } from 'lucide-react';
 import KeyInput from './components/KeyInput';
+import ZesImageStudio from './components/ZesImageStudio';
+import ZesVideoStudio from './components/ZesVideoStudio';
+import PublishingStudio from './components/PublishingStudio';
 import MediaInput from './components/MediaInput';
 import McpConnectCard from './components/McpConnectCard';
 import ResultCard from './components/ResultCard';
@@ -37,7 +40,7 @@ import { JobPollError, pollFailureAction } from './lib/jobPoll';
 
 // Enhanced "Encryption" using XOR + Base64 with a Salt
 // This is better than plain Base64 but still client-side.
-const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "OpenShorts-Static-Salt-Change-Me";
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "Clipping AI-Static-Salt-Change-Me";
 const ENCRYPTION_PREFIX = "ENC:";
 
 const encrypt = (text) => {
@@ -243,7 +246,7 @@ const UserProfileSelector = ({ profiles, selectedUserId, onSelect, onConnect }) 
   );
 };
 
-const SESSION_KEY = 'openshorts_session';
+const SESSION_KEY = 'clippingai_session';
 
 // The server's own explanation for a rejected/failed job, readable: FastAPI
 // answers {"detail": "..."} or {"detail": {"message": ...}}. Showing the raw
@@ -684,7 +687,7 @@ function App() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `openshorts_clips_${(jobId || '').slice(0, 8)}.zip`;
+      a.download = `clippingai_clips_${(jobId || '').slice(0, 8)}.zip`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -1357,6 +1360,9 @@ function App() {
     { id: 'ai-agent', ord: '04', icon: Bot, label: 'AI Agent', short: 'agent', byok: true },
     { id: 'ugc-gallery', ord: '05', icon: LayoutGrid, label: 'UGC Gallery', short: 'gallery', primary: true },
     { id: 'thumbnails', ord: '06', icon: Image, label: 'YouTube Studio', short: 'studio', primary: true },
+    { id: 'zes-image', ord: '07', icon: Image, label: 'Image Studio', short: 'image', primary: true },
+    { id: 'zes-video', ord: '08', icon: Film, label: 'Video Studio', short: 'video', primary: true },
+    { id: 'publishing', ord: '09', icon: Send, label: 'Publishing', short: 'publish', primary: true },
     ...(billingEnabled && isSignedIn ? [{ id: 'history', ord: '07', icon: History, label: 'History', short: 'history' }] : []),
     { id: 'settings', ord: '08', icon: Settings, label: 'Settings', short: 'settings' },
   ];
@@ -1408,11 +1414,11 @@ function App() {
         </a>
       )}
       <a
-        href="mailto:info@openshorts.app"
+        href="mailto:info@clippingai.local"
         className="flex items-center gap-2 px-3 py-2 text-xs lowercase text-muted hover:text-ink2 transition-colors"
       >
         <Mail size={14} className="shrink-0" />
-        <span className={collapsed ? 'hidden lg:block truncate' : 'truncate'}>info@openshorts.app</span>
+        <span className={collapsed ? 'hidden lg:block truncate' : 'truncate'}>info@clippingai.local</span>
       </a>
     </>
   );
@@ -1421,11 +1427,11 @@ function App() {
   // entirely — an unlabelled 80px rail ate a fifth of a phone screen.
   const Sidebar = () => (
     <div className="hidden md:flex w-20 lg:w-64 bg-paper2 border-r border-rule flex-col h-full shrink-0 transition-all duration-300">
-      <a href="#app" onClick={() => goToTab('dashboard')} className="p-6 flex items-center gap-3" title="openshorts home">
+      <a href="#app" onClick={() => goToTab('dashboard')} className="p-6 flex items-center gap-3" title="clipping ai home">
         <div className="w-8 h-8 bg-paper3 rounded-input flex items-center justify-center shrink-0 overflow-hidden border border-rule">
-          <img src="/logo-openshorts.png" alt="Logo" className="w-full h-full object-cover" />
+          <img src="/logo-clippingai.svg" alt="Logo" className="w-full h-full object-cover" />
         </div>
-        <span className="font-display lowercase text-lg text-ink hidden lg:block">openshorts</span>
+        <span className="font-display lowercase text-lg text-ink hidden lg:block">clipping ai</span>
       </a>
 
       <nav className="flex-1 px-4 py-4 space-y-1">
@@ -1479,9 +1485,9 @@ function App() {
         <div className="flex items-center justify-between px-5 h-14 border-b border-rule shrink-0">
           <a href="#app" className="flex items-center gap-2.5" onClick={() => goToTab('dashboard')}>
             <div className="w-7 h-7 bg-paper3 rounded-input overflow-hidden border border-rule shrink-0">
-              <img src="/logo-openshorts.png" alt="" className="w-full h-full object-cover" />
+              <img src="/logo-clippingai.svg" alt="" className="w-full h-full object-cover" />
             </div>
-            <span className="font-display lowercase text-lg text-ink">openshorts</span>
+            <span className="font-display lowercase text-lg text-ink">clipping ai</span>
           </a>
           <button
             onClick={() => setNavOpen(false)}
@@ -1589,7 +1595,7 @@ function App() {
               <Menu size={20} />
             </button>
             <span data-tutorial="nav-clips" className="md:hidden font-display lowercase text-base text-ink truncate">
-              {activeNav?.label || 'openshorts'}
+              {activeNav?.label || 'clipping ai'}
             </span>
             {status !== 'idle' && (
               <button
@@ -1667,10 +1673,10 @@ function App() {
                 <span className="font-medium text-ink">Required API keys missing.</span>{' '}
                 <span className="text-muted">
                   {!geminiOk && !uploadPostKey
-                    ? 'Set your Gemini and Upload-Post API keys to use OpenShorts.'
+                    ? 'Set your Gemini and Upload-Post API keys to use Clipping AI.'
                     : !geminiOk
-                      ? 'Set your Gemini API key to use OpenShorts.'
-                      : 'Set your Upload-Post API key to use OpenShorts.'}
+                      ? 'Set your Gemini API key to use Clipping AI.'
+                      : 'Set your Upload-Post API key to use Clipping AI.'}
                 </span>
               </div>
             </div>
@@ -2141,6 +2147,21 @@ function App() {
             </div>
           )}
 
+          {activeTab === 'zes-image' && (
+            <div className="h-full overflow-y-auto custom-scrollbar animate-fade">
+              <ZesImageStudio geminiApiKey={apiKey} />
+            </div>
+          )}
+          {activeTab === 'zes-video' && (
+            <div className="h-full overflow-y-auto custom-scrollbar animate-fade">
+              <ZesVideoStudio />
+            </div>
+          )}
+          {activeTab === 'publishing' && (
+            <div className="h-full overflow-y-auto custom-scrollbar animate-fade">
+              <PublishingStudio />
+            </div>
+          )}
           {activeTab === 'thumbnails' && (
             <ThumbnailStudio
               geminiApiKey={apiKey}
@@ -2602,7 +2623,7 @@ function App() {
       >
         <div className="space-y-4">
           <p className="text-sm text-muted">
-            OpenShorts needs both a <strong className="text-ink2">Gemini</strong> API key and an <strong className="text-ink2">Upload-Post</strong> API key. Both have free tiers.
+            Clipping AI needs both a <strong className="text-ink2">Gemini</strong> API key and an <strong className="text-ink2">Upload-Post</strong> API key. Both have free tiers.
           </p>
 
           {/* Gemini block */}

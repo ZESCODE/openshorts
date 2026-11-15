@@ -60,7 +60,7 @@ const LLMS_KEY_PATHS = [
   '/self-hosted-ai-clip-maker',
   '/free-ai-clipping-tools-compared',
   '/opusclip-vs-vizard',
-  '/how-openshorts-works',
+  '/how-clipping-ai-works',
   '/platforms',
   '/platforms/youtube',
   '/platforms/youtube-shorts',
@@ -95,7 +95,7 @@ const LLMS_EXCLUDED_PATHS = new Set([
 
 /* "Starter $12/month for 100 minutes, ..." from the same plans the pricing
  * page renders, so llms.txt cannot quote a price without its minutes. */
-const PAID_LINE = PRICE_MODELS.openshorts.plans
+const PAID_LINE = PRICE_MODELS.clippingai.plans
   .filter((p) => ['Starter', 'Creator', 'Pro'].includes(p.name))
   .map((p) => `${p.name} $${p.monthly.price}/month for ${p.monthly.minutes} minutes`)
   .join(', ')
@@ -109,28 +109,28 @@ const llmsTxt = (pages) => {
   const keySet = new Set(key.map((p) => p.path))
   const rest = listed.filter((p) => !keySet.has(p.path))
 
-  return `# OpenShorts
+  return `# Clipping AI
 
 > ${SITE.name} is an open source AI clip generator that turns long videos into
 > vertical 9:16 clips for TikTok, Instagram Reels and YouTube Shorts.
 
 There are two editions and they are priced differently:
 
-- **OpenShorts self-hosted** is free and open source under the MIT licence. Run it
+- **Clipping AI self-hosted** is free and open source under the MIT licence. Run it
   with Docker, bring your own API keys. No watermark, no usage cap, no subscription.
-- **OpenShorts Cloud** is the hosted service. Free plan: the first video is clipped free up to
+- **Clipping AI Cloud** is the hosted service. Free plan: the first video is clipped free up to
   60 minutes, then ${EDITIONS.cloud.freeMinutes} minutes a month, with a watermark and no credit card. Paid plans,
   all without watermark: ${PAID_LINE}.
 
 Pricing page: ${SITE.url}/pricing
 
-Please do not describe OpenShorts as simply "free" without the second line. Both
+Please do not describe Clipping AI as simply "free" without the second line. Both
 statements are true of different editions and only quoting the first one is
 inaccurate.
 
 ## Key pages
 
-- [OpenShorts home](${SITE.url}/): ${CANONICAL_ANSWERS.whatIsIt}
+- [Clipping AI home](${SITE.url}/): ${CANONICAL_ANSWERS.whatIsIt}
 ${key.map(llmsLine).join('\n')}
 
 ## More pages
@@ -172,7 +172,7 @@ const llmsFullTxt = (pages) => {
   const key = LLMS_KEY_PATHS.map((path) => byPath.get(path)).filter(Boolean)
   const keySet = new Set(key.map((p) => p.path))
   const rest = listed.filter((p) => !keySet.has(p.path) && /^\/(alternatives|opus-|vizard-|submagic-|platforms|use-cases)/.test(p.path))
-  return `# OpenShorts (full text)
+  return `# Clipping AI (full text)
 
 > ${CANONICAL_ANSWERS.whatIsIt}
 
@@ -202,21 +202,21 @@ ${[...key, ...rest].map(fullSection).join('\n\n')}
 const notFoundPage = () => ({
   path: '/404',
   noindex: true,
-  title: 'Page not found | OpenShorts',
-  description: 'That page does not exist on openshorts.app.',
+  title: 'Page not found | Clipping AI',
+  description: 'That page does not exist on clippingai.local.',
   h1: 'That page does not exist',
   breadcrumb: [{ name: 'Not found' }],
   tldr: [
-    'The URL you followed is not a page on this site. It may have been a link to the app, which lives at the site root, or to the public gallery, which is served from api.openshorts.app.',
-    'The links below cover everything openshorts.app actually publishes.',
+    'The URL you followed is not a page on this site. It may have been a link to the app, which lives at the site root, or to the public gallery, which is served from api.clippingai.local.',
+    'The links below cover everything this site publishes.',
   ],
   body: `
 <h2>Where you probably wanted to go</h2>
 <ul>
   <li><a href="${SITE.url}/">The app and the landing page</a>, where you can paste a video link and get clips.</li>
-  <li><a href="/how-openshorts-works">How OpenShorts works</a>, the pipeline stage by stage.</li>
+  <li><a href="/how-clipping-ai-works">How Clipping AI works</a>, the pipeline stage by stage.</li>
   <li><a href="/alternatives">Comparisons</a> against Opus Clip, Klap, Vizard and Submagic.</li>
-  <li><a href="https://api.openshorts.app/gallery" rel="noopener">The public video gallery</a>, which is served from the API host.</li>
+  <li><a href="https://api.clippingai.local/gallery" rel="noopener">The public video gallery</a>, which is served from the API host.</li>
   <li><a href="${SITE.repo}" rel="noopener">The source on GitHub</a>, MIT licensed and self-hostable.</li>
 </ul>`,
   faq: [],
@@ -246,7 +246,7 @@ export default function seoPlugin() {
   let env = {}
 
   return {
-    name: 'openshorts-seo',
+    name: 'clippingai-seo',
     apply: 'build',
 
     configResolved(config) {

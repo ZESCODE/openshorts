@@ -97,9 +97,16 @@ OUTPUT — RETURN ONLY VALID JSON (no markdown, no comments). Order clips by pre
 model = YOLO(os.environ.get("YOLO_MODEL_PATH", "yolov8n.pt"))
 
 # --- MediaPipe Setup ---
-# Use standard Face Detection (BlazeFace) for speed
-mp_face_detection = mp.solutions.face_detection
-face_detection = mp_face_detection.FaceDetection(model_selection=1, min_detection_confidence=0.5)
+# Use standard Face Detection (BlazeFace) for speed.
+# mediapipe has no cp313 aarch64 wheels (stops at cp311); degrade to a
+# no-op detector so TRACK layouts fall back to the center crop instead of
+# crashing the job.
+face_detection = None
+try:
+    mp_face_detection = mp.solutions.face_detection
+    face_detection = mp_face_detection.FaceDetection(model_selection=1, min_detection_confidence=0.5)
+except Exception as _e:  # pragma: no cover - platform dependent
+    print(f"[warn] mediapipe face detection unavailable ({_e}); using fallback crop", file=sys.stderr)
 
 # Consecutive detections a large target move must survive before the camera
 # follows it (see SmoothedCameraman.update_target). Env-overridable so the
@@ -445,6 +452,8 @@ def detect_face_candidates(frame):
     height, width, _ = frame.shape
     small, _scale = _detection_frame(frame)
     rgb_frame = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
+    if face_detection is None:
+        return []
     with DETECT_LOCK:
         results = face_detection.process(rgb_frame)
     

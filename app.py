@@ -8044,6 +8044,8 @@ class SocialPostRequest(BaseModel):
     description: Optional[str] = None
     scheduled_date: Optional[str] = None # ISO-8601 string
     timezone: Optional[str] = "UTC"
+    tags: Optional[List[str]] = None # YouTube tags
+    privacy_status: Optional[str] = None # public | unlisted | private (YouTube)
 
 import httpx
 
@@ -8208,13 +8210,15 @@ async def post_to_socials(req: SocialPostRequest, request: Request):
              yt_title = req.title or clip.get('video_title_for_youtube_short', final_title)
              data_payload["youtube_title"] = youtube_title(yt_title)
              data_payload["youtube_description"] = final_description
-             data_payload["privacyStatus"] = "public"
+             data_payload["privacyStatus"] = req.privacy_status or "public"
 
         # The upload is a blocking multipart POST of the whole clip (tens of
         # seconds for TikTok+YouTube). Run inline, it froze the event loop:
         # 23-sep-2026 19:47:48 UTC one post stalled every request, /health
         # included, for 42 s and the uptime monitor paged "openshorts-api
         # down". It runs in a worker thread so the API keeps answering.
+        if req.tags:
+            data_payload["tags[]"] = req.tags
         print(f"📡 Sending to Upload-Post for platforms: {req.platforms}")
         response = await asyncio.to_thread(
             _post_video_blocking, url, headers, data_payload, file_path, filename, 120.0
@@ -8242,10 +8246,11 @@ async def social_post_status(request_id: str, request: Request):
     itself can still fail per platform, and the dashboard used to say "Posted
     successfully!" either way.
     """
+    # Cloud: the owner map isolates each user's posts. Self-host (single
+    # profile, BYOK): the map can miss after a restart or an unauthenticated
+    # call, so fall back to asking Upload-Post directly with the env key.
     owner = _post_request_owners.get(request_id)
-    if owner is None:
-        return {"status": "unknown"}
-    if owner != await _owner_id(request):
+    if owner is not None and owner != await _owner_id(request):
         raise HTTPException(status_code=404, detail="Not found")
     upload_key, _ = await resolve_upload_post(request, None)
     if not upload_key:

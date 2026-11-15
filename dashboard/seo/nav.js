@@ -96,8 +96,8 @@ export const NAV_LINKS = [
 ]
 
 export const NAV_STRINGS = {
-  en: { cta: 'Get free clips', ctaHint: 'First video free up to 60 min, no card. No watermark from $12/month, or self-host free (MIT).', openApp: 'Open app', login: 'Log in', menu: 'Menu', main: 'Main', github: 'OpenShorts on GitHub' },
-  es: { cta: 'Clips gratis', ctaHint: 'Primer vídeo gratis hasta 60 min, sin tarjeta. Sin marca de agua desde 12 $/mes, o autoalojado gratis (MIT).', openApp: 'Abrir la app', login: 'Iniciar sesión', menu: 'Menú', main: 'Principal', github: 'OpenShorts en GitHub' },
+  en: { cta: 'Get free clips', ctaHint: 'First video free up to 60 min, no card. No watermark from $12/month, or self-host free (MIT).', openApp: 'Open app', login: 'Log in', menu: 'Menu', main: 'Main', github: 'Clipping AI on GitHub' },
+  es: { cta: 'Clips gratis', ctaHint: 'Primer vídeo gratis hasta 60 min, sin tarjeta. Sin marca de agua desde 12 $/mes, o autoalojado gratis (MIT).', openApp: 'Abrir la app', login: 'Iniciar sesión', menu: 'Menú', main: 'Principal', github: 'Clipping AI en GitHub' },
 }
 
 const pick = (v, lang) => (v && typeof v === 'object' ? v[lang] || v.en : v)
@@ -130,7 +130,7 @@ export function renderNav({ lang = 'en', signedIn = false, showLogin = true } = 
   const login = signedIn || !showLogin ? '' : `<a class="osn-login" href="${LOGIN_HREF}">${esc(t.login)}</a>`
   return `<header class="osn" data-osn>
 <div class="osn-bar">
-  <a class="osn-brand" href="/"><img src="/logo-openshorts.png" alt="OpenShorts logo" width="28" height="28"><span>openshorts</span></a>
+  <a class="osn-brand" href="/"><img src="/logo-clippingai.svg" alt="Clipping AI logo" width="28" height="28"><span>clipping ai</span></a>
   <input type="checkbox" id="osn-toggle" class="osn-toggle" aria-label="${esc(t.menu)}">
   <label for="osn-toggle" class="osn-burger" title="${esc(t.menu)}">${BURGER}</label>
   <nav class="osn-menu" aria-label="${esc(t.main)}">
@@ -146,7 +146,7 @@ export function renderNav({ lang = 'en', signedIn = false, showLogin = true } = 
  * so the same block works inside the SPA and on the static pages, which load
  * neither Tailwind nor each other's variables. */
 export const NAV_CSS = `
-.osn{position:sticky;top:0;z-index:50;background:oklch(13% 0.014 265);border-bottom:1px solid oklch(96% 0.006 262 / .08);
+.osn{position:sticky;top:0;z-index:50;background:oklch(12% 0.02 258);border-bottom:1px solid oklch(96% 0.006 262 / .08);
   font-family:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:.875rem;line-height:1.4}
 .osn *{box-sizing:border-box}
 .osn a{text-decoration:none}
@@ -160,7 +160,7 @@ export const NAV_CSS = `
 .osn-top,.osn-dd>summary,.osn-login{color:oklch(64% 0.012 262);text-transform:lowercase;white-space:nowrap;cursor:pointer;transition:color .15s}
 .osn-top:hover,.osn-dd>summary:hover,.osn-dd[open]>summary,.osn-login:hover{color:oklch(96% 0.006 262)}
 .osn-top:focus-visible,.osn-dd>summary:focus-visible,.osn-login:focus-visible,.osn-cta:focus-visible,.osn-brand:focus-visible,
-.osn-panel a:focus-visible{outline:2px solid oklch(76% 0.17 50);outline-offset:3px;border-radius:4px}
+.osn-panel a:focus-visible{outline:2px solid oklch(64% 0.19 258);outline-offset:3px;border-radius:4px}
 .osn-dd>summary{list-style:none;display:flex;align-items:center;gap:.3rem;user-select:none}
 .osn-dd>summary::-webkit-details-marker{display:none}
 .osn-chev{transition:transform .15s;opacity:.8}
@@ -168,18 +168,18 @@ export const NAV_CSS = `
 .osn-gh{display:flex;align-items:center}
 .osn-gh-label{display:none}
 .osn-panel{list-style:none;margin:0;padding:.4rem;position:absolute;top:calc(100% + 1.1rem);left:-.9rem;min-width:16rem;
-  background:oklch(16.5% 0.015 265);border:1px solid oklch(96% 0.006 262 / .14);border-radius:10px;
+  background:oklch(15.5% 0.022 258);border:1px solid oklch(96% 0.006 262 / .14);border-radius:10px;
   box-shadow:0 18px 40px -12px rgb(0 0 0 / .6)}
 .osn-panel li{margin:0}
 .osn-panel a{display:block;padding:.5rem .7rem;border-radius:7px;color:oklch(86% 0.01 262);text-transform:lowercase;white-space:nowrap}
-.osn-panel a:hover{background:oklch(20% 0.016 265);color:oklch(96% 0.006 262)}
+.osn-panel a:hover{background:oklch(19% 0.024 258);color:oklch(96% 0.006 262)}
 .osn-panel small{display:block;font-size:.75rem;color:oklch(64% 0.012 262)}
-.osn-cta{background:oklch(76% 0.17 50);color:oklch(17% 0.03 50);padding:.5rem 1.1rem;border-radius:8px;font-weight:500;
+.osn-cta{background:oklch(64% 0.19 258);color:oklch(16% 0.03 258);padding:.5rem 1.1rem;border-radius:8px;font-weight:500;
   white-space:nowrap;text-transform:lowercase;flex-shrink:0;transition:filter .15s}
-.osn-cta:hover{filter:brightness(1.08);color:oklch(17% 0.03 50)}
+.osn-cta:hover{filter:brightness(1.08);color:oklch(16% 0.03 258)}
 .osn-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
 .osn-burger{display:none;color:oklch(86% 0.01 262);cursor:pointer;padding:.4rem;margin-right:-.4rem;border-radius:6px}
-.osn-toggle:focus-visible+.osn-burger{outline:2px solid oklch(76% 0.17 50);outline-offset:2px}
+.osn-toggle:focus-visible+.osn-burger{outline:2px solid oklch(64% 0.19 258);outline-offset:2px}
 @media (min-width:64rem) and (max-width:74.99rem){.osn-bar{gap:1rem}.osn-menu{gap:1rem}.osn-list{gap:1rem}}
 @media (max-width:63.99rem){
   .osn-bar{padding:0 1rem;gap:.75rem}
@@ -187,7 +187,7 @@ export const NAV_CSS = `
   .osn-cta{order:2;padding:.45rem .85rem}
   .osn-burger{display:flex;order:3}
   .osn-menu{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;
-    background:oklch(13% 0.014 265);border-bottom:1px solid oklch(96% 0.006 262 / .14);padding:.5rem 1rem 1rem;
+    background:oklch(12% 0.02 258);border-bottom:1px solid oklch(96% 0.006 262 / .14);padding:.5rem 1rem 1rem;
     max-height:calc(100dvh - 4rem);overflow-y:auto}
   .osn-toggle:checked~.osn-menu{display:flex}
   .osn-list{flex-direction:column;align-items:stretch;gap:0}

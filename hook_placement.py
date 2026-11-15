@@ -189,11 +189,14 @@ _DETECTOR_LOCK = threading.Lock()
 def _detector():
     global _DETECTOR
     if _DETECTOR is None:
-        import mediapipe as mp
-        # model_selection=1: the full-range model, so the small faces of a
-        # GENERAL (blurred-backdrop) layout are found too.
-        _DETECTOR = mp.solutions.face_detection.FaceDetection(
-            model_selection=1, min_detection_confidence=0.5)
+        try:
+            import mediapipe as mp
+            # model_selection=1: the full-range model, so the small faces of a
+            # GENERAL (blurred-backdrop) layout are found too.
+            _DETECTOR = mp.solutions.face_detection.FaceDetection(
+                model_selection=1, min_detection_confidence=0.5)
+        except Exception:
+            _DETECTOR = False  # unavailable (e.g. mediapipe has no cp313 wheel)
     return _DETECTOR
 
 

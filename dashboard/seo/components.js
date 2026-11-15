@@ -55,7 +55,7 @@ export const COMPONENTS_CSS = `
 .calc input[type=range]{width:100%;accent-color:var(--brass)}
 .calc .billing{display:flex;gap:.35rem}
 .calc .billing button{background:transparent;border:1px solid var(--rule2);color:var(--ink2);border-radius:999px;padding:.35rem .85rem;font:inherit;font-size:.85rem;cursor:pointer}
-.calc .billing button[aria-pressed=true]{background:var(--brass);border-color:var(--brass);color:oklch(17% 0.03 50)}
+.calc .billing button[aria-pressed=true]{background:var(--brass);border-color:var(--brass);color:oklch(16% 0.03 258)}
 .bars{list-style:none;padding:0;margin:0}
 .bars li{display:grid;grid-template-columns:8.5rem 1fr;gap:.25rem 1rem;align-items:center;padding:.6rem 0;border-top:1px solid var(--rule);margin:0}
 .bars .bt{font-weight:500;color:var(--ink);line-height:1.3}
@@ -65,14 +65,14 @@ export const COMPONENTS_CSS = `
 .bars .fill{position:absolute;inset:0 auto 0 0;background:oklch(64% 0.012 262 / .35);border-radius:6px;min-width:2px;transition:width .25s}
 .bars li.us .fill{background:var(--brass)}
 .bars .val{position:absolute;left:.6rem;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--ink);white-space:nowrap}
-.bars li.us .val{color:oklch(17% 0.03 50);font-weight:600}
+.bars li.us .val{color:oklch(16% 0.03 258);font-weight:600}
 .bars li.us .val.ext{color:var(--brass)}
 .bars .val.ext{color:var(--ink)}
 .calc-note{font-size:.8rem;color:var(--muted);margin:.75rem 0 0}
 .flow{display:grid;gap:1rem;grid-template-columns:1fr;margin:1.5rem 0}
 @media(min-width:44rem){.flow{grid-template-columns:1fr 1fr}}
 .lane{background:var(--paper2);border:1px solid var(--rule2);border-radius:14px;padding:1.1rem 1.2rem}
-.lane.us{border-color:oklch(76% 0.17 50 / .55)}
+.lane.us{border-color:oklch(64% 0.19 258 / .55)}
 .lane h3{margin:0 0 .8rem;font-family:var(--display);font-weight:400;font-size:1.3rem}
 .lane ol{list-style:none;padding:0;margin:0;counter-reset:s}
 .lane li{position:relative;padding:.55rem 0 .55rem 2.3rem;margin:0;border-top:1px dashed var(--rule2);font-size:.92rem}
@@ -80,12 +80,12 @@ export const COMPONENTS_CSS = `
 .lane li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:.5rem;width:1.6rem;height:1.6rem;border-radius:50%;
   display:grid;place-items:center;font-family:var(--mono);font-size:.72rem;background:var(--paper3);color:var(--ink2)}
 .lane li.you::after{content:"you";font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;
-  margin-left:.5rem;padding:.1rem .45rem;border-radius:999px;background:oklch(76% 0.17 50 / .18);color:var(--brass)}
-.lane.us li::before{background:oklch(76% 0.17 50 / .2);color:var(--brass)}
+  margin-left:.5rem;padding:.1rem .45rem;border-radius:999px;background:oklch(64% 0.19 258 / .18);color:var(--brass)}
+.lane.us li::before{background:oklch(64% 0.19 258 / .2);color:var(--brass)}
 .verdict{display:grid;gap:1rem;grid-template-columns:1fr;margin:1.5rem 0}
 @media(min-width:44rem){.verdict{grid-template-columns:1fr 1fr}}
 .verdict div{border:1px solid var(--rule2);border-radius:14px;padding:1.1rem 1.2rem;background:var(--paper2)}
-.verdict .us{border-color:oklch(76% 0.17 50 / .55)}
+.verdict .us{border-color:oklch(64% 0.19 258 / .55)}
 .verdict strong{display:block;font-family:var(--display);font-weight:400;font-size:1.3rem;color:var(--ink);margin-bottom:.6rem}
 .verdict ul{margin:0;padding-left:1.1rem}
 .verdict li{font-size:.92rem}
@@ -101,7 +101,7 @@ export const factTiles = (facts) =>
     .map((f) => `<div class="fact"><span class="k">${esc(f.k)}</span><span class="v">${esc(f.v)}</span><span class="s">${esc(f.s || '')}</span></div>`)
     .join('')}</div>`
 
-/* Real product output: a 16:9 source excerpt next to the 9:16 clip OpenShorts
+/* Real product output: a 16:9 source excerpt next to the 9:16 clip Clipping AI
  * made from it. Every source here is Creative Commons Attribution or our own,
  * and the credit line under the block is what the licence asks for. */
 export const DEMOS = {
@@ -121,7 +121,7 @@ export const DEMOS = {
   },
 }
 
-/* Real product output: the original and the clip OpenShorts made from it,
+/* Real product output: the original and the clip Clipping AI made from it,
  * side by side and in sync, in one video. Every source is Creative Commons
  * Attribution and the credit line under the block is what the licence asks
  * for. */
@@ -130,9 +130,9 @@ export const demoBlock = (which = 'split', caption) => {
   return `
 <figure class="demo">
   <video src="${d.video}" poster="${d.poster}" autoplay muted loop playsinline preload="none" width="960" height="540"
-    aria-label="Original video next to the vertical clip OpenShorts made from it"></video>
+    aria-label="Original video next to the vertical clip Clipping AI made from it"></video>
 </figure>
-<p class="calc-note">Real OpenShorts output, not a mock-up. ${esc(caption || d.caption)} Source: ${d.credit}.</p>`
+<p class="calc-note">Real Clipping AI output, not a mock-up. ${esc(caption || d.caption)} Source: ${d.credit}.</p>`
 }
 
 /** Two workflows side by side. Steps marked { you: true } need a human. */
@@ -148,7 +148,7 @@ export const flowCompare = (them, us) => {
 export const verdictCards = (name, pickThem, pickUs) => `
 <div class="verdict">
   <div><strong>Pick ${esc(name)} if</strong><ul>${pickThem.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
-  <div class="us"><strong>Pick OpenShorts if</strong><ul>${pickUs.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+  <div class="us"><strong>Pick Clipping AI if</strong><ul>${pickUs.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
 </div>`
 
 /* --- Cost calculator ------------------------------------------------------
@@ -180,7 +180,7 @@ const barsHtml = (tools, minutes, billing) => {
       const label = r
         ? `${money(r.price)}/mo · ${r.plan}${r.watermark ? ' · watermark' : ''}`
         : 'No published plan, custom pricing'
-      return `<li class="${t.startsWith('openshorts') ? 'us' : ''}" data-tool="${esc(t)}"><span class="bt">${esc(m.name)}<small>${esc(m.unit)}</small></span><span class="track"><span class="fill" style="width:${w}%"></span><span class="val${w < 45 ? ' ext' : ''}"${w < 45 ? ` style="left:calc(${w}% + .6rem)"` : ''}>${esc(label)}</span></span></li>`
+      return `<li class="${t.startsWith('clippingai') ? 'us' : ''}" data-tool="${esc(t)}"><span class="bt">${esc(m.name)}<small>${esc(m.unit)}</small></span><span class="track"><span class="fill" style="width:${w}%"></span><span class="val${w < 45 ? ' ext' : ''}"${w < 45 ? ` style="left:calc(${w}% + .6rem)"` : ''}>${esc(label)}</span></span></li>`
     })
     .join('')
 }
@@ -188,7 +188,7 @@ const barsHtml = (tools, minutes, billing) => {
 let calcCount = 0
 export function costCalculator(tools, { minutes = 300, note } = {}) {
   const id = `calc${++calcCount}`
-  const list = ['openshorts-self', 'openshorts', ...tools.filter((t) => !t.startsWith('openshorts') && PRICE_MODELS[t])]
+  const list = ['clippingai-self', 'clippingai', ...tools.filter((t) => !t.startsWith('clippingai') && PRICE_MODELS[t])]
   const models = Object.fromEntries(list.map((t) => [t, PRICE_MODELS[t]]))
   const checked = list.map((t) => PRICE_MODELS[t].checked).filter(Boolean).sort()[0]
   return `

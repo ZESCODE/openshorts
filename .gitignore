@@ -52,3 +52,9 @@ CLAUDE.local.md
 
 # Rust build output
 osrender/target/
+
+# Runtime data and install logs (local machine only)
+data/
+pip-install.log
+pip*.log
+server.log

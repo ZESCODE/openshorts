@@ -26,10 +26,10 @@ const esc = (s) =>
  * go through Vite or Tailwind, so they cannot rely on the app's stylesheet. */
 const CSS = `
 :root{
-  --paper:oklch(13% 0.014 265);--paper2:oklch(16.5% 0.015 265);--paper3:oklch(20% 0.016 265);
+  --paper:oklch(12% 0.02 258);--paper2:oklch(15.5% 0.022 258);--paper3:oklch(19% 0.024 258);
   --ink:oklch(96% 0.006 262);--ink2:oklch(86% 0.01 262);--muted:oklch(64% 0.012 262);
   --rule:oklch(96% 0.006 262 / .08);--rule2:oklch(96% 0.006 262 / .14);
-  --brass:oklch(76% 0.17 50);--ok:oklch(75% 0.11 150);
+  --brass:oklch(64% 0.19 258);--ok:oklch(75% 0.11 150);
   --display:"Instrument Serif",ui-serif,Georgia,serif;
   --body:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,monospace;
@@ -107,13 +107,13 @@ td.os{color:var(--ink)}
 .cta-box strong{display:block;font-family:var(--display);font-weight:400;font-size:1.2rem;
   line-height:1.25;color:var(--ink);margin-bottom:.35rem}
 .cta-box p{margin:0;font-size:.9rem;color:var(--muted)}
-.cta-box .btn{background:var(--brass);color:oklch(17% 0.03 50);padding:.65rem 1.2rem;
+.cta-box .btn{background:var(--brass);color:oklch(16% 0.03 258);padding:.65rem 1.2rem;
   border-radius:8px;font-size:.9rem;font-weight:500;text-decoration:none;white-space:nowrap}
 .cta-act{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem}
 .cta-micro{font-size:.72rem;color:var(--muted);max-width:18rem;line-height:1.4}
 .best-alts ol{margin:0 0 .4rem}
 .plans .btn-primary{display:inline-block;text-decoration:none;white-space:nowrap}
-.cta-box .btn:hover{color:oklch(17% 0.03 50);filter:brightness(1.06)}
+.cta-box .btn:hover{color:oklch(16% 0.03 258);filter:brightness(1.06)}
 .lede{font-size:1.05rem;color:var(--ink2);max-width:44rem;margin:0 0 1.5rem}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .tool{background:var(--paper2);border:1px solid var(--rule2);border-radius:14px;padding:1.25rem;margin:0 0 2.5rem}
@@ -124,7 +124,7 @@ td.os{color:var(--ink)}
 .tool textarea{width:100%;resize:vertical;line-height:1.5}
 .tool input:focus-visible,.tool textarea:focus-visible,.tool select:focus-visible,.tool button:focus-visible{
   outline:2px solid var(--brass);outline-offset:2px}
-.btn-primary{background:var(--brass);color:oklch(17% 0.03 50);border:0;border-radius:9px;padding:.75rem 1.2rem;
+.btn-primary{background:var(--brass);color:oklch(16% 0.03 258);border:0;border-radius:9px;padding:.75rem 1.2rem;
   font:inherit;font-weight:600;font-size:.95rem;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block}
 .btn-primary:disabled{opacity:.55;cursor:wait}
 .btn-ghost,.tool-actions button{background:transparent;color:var(--ink2);border:1px solid var(--rule2);border-radius:8px;
@@ -152,7 +152,7 @@ td.os{color:var(--ink)}
 .modes{display:flex;flex-wrap:wrap;gap:.4rem;margin:0 0 .9rem;border:0;padding:0}
 .modes label{border:1px solid var(--rule2);border-radius:999px;padding:.4rem .95rem;font-size:.9rem;cursor:pointer;color:var(--ink2)}
 .modes input{position:absolute;opacity:0}
-.modes label:has(input:checked){background:var(--brass);color:oklch(17% 0.03 50);border-color:var(--brass)}
+.modes label:has(input:checked){background:var(--brass);color:oklch(16% 0.03 258);border-color:var(--brass)}
 .modes label:has(input:focus-visible){outline:2px solid var(--brass);outline-offset:2px}
 .field{display:block;margin:0 0 .8rem}
 .field span{display:block;font-size:.8rem;color:var(--muted);margin-bottom:.3rem}
@@ -207,18 +207,18 @@ const I18N = {
   en: {
     home: 'Home',
     related: 'Related pages',
-    by: 'By the OpenShorts team',
+    by: 'By the Clipping AI team',
     published: 'Published',
     updated: 'Updated',
     footer: {
-      product: 'OpenShorts',
+      product: 'Clipping AI',
       platforms: 'Platforms',
       useCases: 'Use cases',
       compare: 'Compare',
       tools: 'Free tools',
       guides: 'Guides',
       more: 'More comparisons',
-      note: `OpenShorts self-hosted is free and open source under MIT. OpenShorts Cloud
+      note: `Clipping AI self-hosted is free and open source under MIT. Clipping AI Cloud
   is the hosted service: your first video free up to 60 minutes, then 20 free
   minutes a month, paid plans from $12/month.`,
       lastUpdated: 'Last updated',
@@ -227,19 +227,19 @@ const I18N = {
   es: {
     home: 'Inicio',
     related: 'Páginas relacionadas',
-    by: 'Por el equipo de OpenShorts',
+    by: 'Por el equipo de Clipping AI',
     published: 'Publicado',
     updated: 'Actualizado',
     footer: {
-      product: 'OpenShorts',
+      product: 'Clipping AI',
       platforms: 'Plataformas',
       useCases: 'Casos de uso',
       compare: 'Comparativas',
       tools: 'Herramientas gratis',
       guides: 'Guías',
       more: 'Más comparativas',
-      note: `OpenShorts autoalojado es gratis y de código abierto con licencia MIT.
-  OpenShorts Cloud es el servicio alojado: tu primer vídeo gratis hasta 60
+      note: `Clipping AI autoalojado es gratis y de código abierto con licencia MIT.
+  Clipping AI Cloud es el servicio alojado: tu primer vídeo gratis hasta 60
   minutos, después 20 minutos gratis al mes, planes de pago desde 12 $/mes.`,
       lastUpdated: 'Última actualización',
     },
@@ -413,7 +413,7 @@ const FOOTER_COLUMNS = [
     ['/how-to/instagram-reel-dimensions', 'Instagram Reel dimensions'],
     ['/how-to/make-a-reel-on-facebook', 'How to make a Reel on Facebook'],
     ['/how-to/best-time-to-post-youtube-shorts', 'Best time to post YouTube Shorts'],
-    ['/how-openshorts-works', 'How it works'],
+    ['/how-clipping-ai-works', 'How it works'],
     ['/self-hosted-ai-clip-maker', 'Self-hosted AI clip maker'],
     ['/open-source-video-clipper', 'Open source video clipper'],
     ['/mcp', 'MCP server and API'],
@@ -423,7 +423,7 @@ const FOOTER_COLUMNS = [
 ]
 
 const FOOTER_PRODUCT = [
-  [`${SITE.url}/`, 'OpenShorts'],
+  [`${SITE.url}/`, 'Clipping AI'],
   ['/pricing', 'Pricing'],
   ['/open-source-ai-video-generator', 'Open source AI video generator'],
   [SITE.repo, 'Source on GitHub'],
@@ -631,7 +631,7 @@ export function renderPage(page, related = [], { cta = true, toolScript = '', bu
 ${page.noindex ? '' : `<link rel="canonical" href="${canonical}">\n`}<meta name="robots" content="${
     page.noindex ? 'noindex,follow' : 'index,follow,max-image-preview:large,max-snippet:-1'
   }">
-${hreflangLinks(page)}<link rel="icon" type="image/png" href="/logo-openshorts.png">
+${hreflangLinks(page)}<link rel="icon" type="image/png" href="/logo-clippingai.svg">
 <link rel="stylesheet" href="/fonts.css">
 ${ANALYTICS}
 ${page.noindex ? '' : ATTRIBUTION}

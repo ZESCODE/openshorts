@@ -16,6 +16,11 @@
     @apply bg-paper text-ink2 antialiased;
     font-family: var(--font-body);
     font-variant-numeric: tabular-nums;
+    /* Frost: a cold blue emission from the top edge, fixed so the shell feels lit. */
+    background-image:
+      radial-gradient(80% 50% at 50% -10%, oklch(64% 0.19 258 / 0.16), transparent 70%),
+      radial-gradient(60% 40% at 100% 0%, oklch(76% 0.12 250 / 0.07), transparent 70%);
+    background-attachment: fixed;
     /* A single stray wide child (a log line, a long URL) used to make the whole
        app pan sideways on a phone. Panes that really are wide scroll on their own. */
     overflow-x: hidden;
@@ -50,24 +55,56 @@
 }
 
 @layer components {
-  /* hairline card, lit from within — replaces every glass/surface card */
+  /* Frost card: cold glass, lit from within and edged with a blue rim. */
   .card,
   .glass-panel {
+    position: relative;
     background:
       radial-gradient(120% 90% at 50% 0%, var(--color-paper-emit) 0%, transparent 70%),
-      var(--color-paper-2);
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--color-paper-3) 86%, transparent),
+        color-mix(in oklab, var(--color-paper-2) 96%, transparent)
+      );
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-card);
+    box-shadow:
+      inset 0 1px 0 oklch(96% 0.006 262 / 0.07),
+      0 24px 60px -40px oklch(64% 0.19 258 / 0.55);
+  }
+
+  /* Explicit blue frost glass — for hero/feature surfaces. */
+  .glass-frost-blue {
+    background:
+      radial-gradient(100% 80% at 50% 0%, oklch(76% 0.12 250 / 0.16) 0%, transparent 70%),
+      linear-gradient(180deg, oklch(64% 0.19 258 / 0.14), oklch(64% 0.19 258 / 0.04));
+    border: 1px solid oklch(76% 0.12 250 / 0.28);
+    border-radius: var(--radius-card);
+    box-shadow:
+      inset 0 1px 0 oklch(96% 0.006 262 / 0.14),
+      0 22px 56px -30px oklch(64% 0.19 258 / 0.6);
+    backdrop-filter: blur(10px);
+  }
+
+  .frost-gradient-text {
+    background: linear-gradient(100deg, var(--color-frost-blue-bright), var(--color-frost-blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .card-hover {
     transition: transform var(--dur-short) var(--ease-out),
                 border-color var(--dur-short) var(--ease-out),
+                box-shadow var(--dur-short) var(--ease-out),
                 background-color var(--dur-short) var(--ease-out);
   }
   .card-hover:hover {
     transform: translateY(-4px);
-    border-color: var(--color-rule-2);
+    border-color: oklch(76% 0.12 250 / 0.38);
+    box-shadow:
+      inset 0 1px 0 oklch(96% 0.006 262 / 0.1),
+      0 30px 70px -40px oklch(64% 0.19 258 / 0.7);
   }
 
   /* mono UPPERCASE micro label — the only uppercase surface */
@@ -100,16 +137,20 @@
     transition: border-color var(--dur-short) var(--ease-out);
   }
   .input-field::placeholder { color: var(--color-muted); opacity: 0.7; }
-  .input-field:focus { border-color: var(--color-accent); }
+  .input-field:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px oklch(64% 0.19 258 / 0.18);
+  }
 
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium lowercase;
-    background: var(--color-accent);
+    background: linear-gradient(180deg, var(--color-accent-2) 0%, var(--color-accent) 55%, var(--color-frost-blue-deep) 100%);
     color: var(--color-accent-ink);
     border-radius: 999px;
+    box-shadow: 0 10px 26px -14px oklch(64% 0.19 258 / 0.8);
     transition: filter var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out);
   }
-  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:hover { filter: brightness(1.1); }
   .btn-primary:active { transform: translateY(1px); }
   .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -120,7 +161,10 @@
     border-radius: 999px;
     transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
   }
-  .btn-ghost:hover { border-color: var(--color-accent); }
+  .btn-ghost:hover {
+    border-color: var(--color-accent);
+    background: oklch(64% 0.19 258 / 0.08);
+  }
   .btn-ghost:active { transform: translateY(1px); }
   .btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
 

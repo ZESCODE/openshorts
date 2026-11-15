@@ -29,11 +29,11 @@ const S = {
   p: 'margin:0 0 1rem;color:oklch(86% 0.01 262);line-height:1.65',
   muted: 'margin:0 0 1rem;color:oklch(64% 0.012 262);line-height:1.65',
   eyebrow:
-    'font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:oklch(76% 0.17 50);margin:0 0 1rem',
+    'font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:oklch(64% 0.19 258);margin:0 0 1rem',
   section: 'padding:3.5rem 0;border-bottom:1px solid oklch(96% 0.006 262 / .08)',
   grid: 'display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))',
   card:
-    'border:1px solid oklch(96% 0.006 262 / .08);border-radius:10px;padding:1.1rem 1.25rem;background:oklch(16.5% 0.015 265)',
+    'border:1px solid oklch(96% 0.006 262 / .08);border-radius:10px;padding:1.1rem 1.25rem;background:oklch(15.5% 0.022 258)',
   a: 'color:oklch(86% 0.01 262);text-underline-offset:3px',
 }
 
@@ -48,7 +48,7 @@ const FEATURES = [
   ['Self-hosted and private', 'Run it with Docker on your own machine and the source video never leaves your infrastructure.'],
   ['Free AI YouTube studio', 'AI thumbnail generator, 10 viral title suggestions and auto-written descriptions with chapter timestamps.'],
   ['Direct social publishing', 'Post to TikTok, Instagram Reels and YouTube Shorts from the dashboard.'],
-  ['MCP server, API and CLI for AI agents', 'Connect Claude, ChatGPT or n8n to an always-on endpoint (mcp.openshorts.app/mcp) and automate clipping end to end, with a REST API, per-user keys, completion webhooks and a zero-dependency CLI (pip install openshorts). Guide at /mcp.'],
+  ['MCP server, API and CLI for AI agents', 'Connect Claude, ChatGPT or n8n to an always-on endpoint (mcp.clippingai.local/mcp) and automate clipping end to end, with a REST API, per-user keys, completion webhooks and a zero-dependency CLI (pip install openshorts). Guide at /mcp.'],
   ['AI UGC video generator', 'The AI writes a script and generates a lip-synced avatar video for any product or business, from $0.65 per video.'],
   ['AI actors with lip-sync', 'Pick an AI actor or upload a photo to get a talking-head video with matched lip movement.'],
 ]
@@ -66,17 +66,17 @@ const STEPS = [
 // FAQPage JSON-LD in index.html, with the same answers.
 const FAQ = [
   [
-    'Is OpenShorts really free?',
-    'Self-hosting is free under the MIT licence, with no watermark and no cap; OpenShorts Cloud has a free plan (your first video up to 60 minutes, then 20 minutes a month, watermarked) and paid plans from $12/month.' +
-      ' Self-hosted costs you hardware and time: on a typical CPU an 8-minute video takes 5 to 8 minutes to process, and you supply your own Google Gemini key, whose free tier covers 1,500 requests a day. On OpenShorts Cloud an NVIDIA GPU clips that same video in about 50 seconds, the Gemini key is included, auto-posting to TikTok, Instagram and YouTube is already wired up, and your clips stay retrievable from any browser.',
+    'Is Clipping AI really free?',
+    'Self-hosting is free under the MIT licence, with no watermark and no cap; Clipping AI Cloud has a free plan (your first video up to 60 minutes, then 20 minutes a month, watermarked) and paid plans from $12/month.' +
+      ' Self-hosted costs you hardware and time: on a typical CPU an 8-minute video takes 5 to 8 minutes to process, and you supply your own Google Gemini key, whose free tier covers 1,500 requests a day. On Clipping AI Cloud an NVIDIA GPU clips that same video in about 50 seconds, the Gemini key is included, auto-posting to TikTok, Instagram and YouTube is already wired up, and your clips stay retrievable from any browser.',
   ],
   [
     'Do the clips have a watermark?',
-    'Only on the free Cloud plan. Clips made on the free plan of OpenShorts Cloud carry a small watermark; every paid plan, from $12/month, has none, and upgrading removes the mark from the clips you already made. The self-hosted edition, free under MIT, never adds one.',
+    'Only on the free Cloud plan. Clips made on the free plan of Clipping AI Cloud carry a small watermark; every paid plan, from $12/month, has none, and upgrading removes the mark from the clips you already made. The self-hosted edition, free under MIT, never adds one.',
   ],
   [
     'Do I need a credit card to start?',
-    'No. The free plan of OpenShorts Cloud needs no credit card: your first video is clipped free up to 60 minutes, then you get 20 free minutes every month, with a watermark. You only add a card if you choose a paid plan, from $12/month.',
+    'No. The free plan of Clipping AI Cloud needs no credit card: your first video is clipped free up to 60 minutes, then you get 20 free minutes every month, with a watermark. You only add a card if you choose a paid plan, from $12/month.',
   ],
   [
     'How many clips do I get from one video?',
@@ -84,19 +84,19 @@ const FAQ = [
   ],
   [
     'Can I clip someone else\'s YouTube video?',
-    'Only if you own it or have the rights or permission to use it. Before a video is processed, OpenShorts asks you to confirm you own the content or have the rights to it, and you are responsible for what you submit. Fair use depends on the country and on how the clip is used, so it is never guaranteed; reuploading someone else\'s video without permission is copyright infringement, and platforms remove it and strike the account. Clip your own videos, channels you manage, or footage you have licensed.',
+    'Only if you own it or have the rights or permission to use it. Before a video is processed, Clipping AI asks you to confirm you own the content or have the rights to it, and you are responsible for what you submit. Fair use depends on the country and on how the clip is used, so it is never guaranteed; reuploading someone else\'s video without permission is copyright infringement, and platforms remove it and strike the account. Clip your own videos, channels you manage, or footage you have licensed.',
   ],
-  ['What is OpenShorts and how does it work?', CANONICAL_ANSWERS.whatIsIt + ' ' + CANONICAL_ANSWERS.howItWorks],
+  ['What is Clipping AI and how does it work?', CANONICAL_ANSWERS.whatIsIt + ' ' + CANONICAL_ANSWERS.howItWorks],
   [
-    'How does OpenShorts compare to Opus Clip?',
-    'Both do AI viral moment detection and smart vertical cropping. OpenShorts is MIT-licensed and can be self-hosted, so the source video never leaves your machine, and it adds voice dubbing into 30+ languages (with your own ElevenLabs key) plus an AI UGC generator with lip-synced actors. Opus Clip is closed source and cloud only, starting at $15/month as of October 2026, and it ships a larger caption-style library. OpenShorts Cloud starts at $12/month, and self-hosting is free. Full comparison at /alternatives/opus-clip.',
+    'How does Clipping AI compare to Opus Clip?',
+    'Both do AI viral moment detection and smart vertical cropping. Clipping AI is MIT-licensed and can be self-hosted, so the source video never leaves your machine, and it adds voice dubbing into 30+ languages (with your own ElevenLabs key) plus an AI UGC generator with lip-synced actors. Opus Clip is closed source and cloud only, starting at $15/month as of October 2026, and it ships a larger caption-style library. Clipping AI Cloud starts at $12/month, and self-hosting is free. Full comparison at /alternatives/opus-clip.',
   ],
   [
     'How does the smart vertical cropping work?',
     'TRACK mode follows a single subject with MediaPipe face detection and a YOLOv8 fallback, damped so the crop holds still inside a safe zone rather than chasing every head movement. GENERAL mode handles group shots and landscapes by preserving the full width over a blurred backdrop. A speaker tracker prevents the crop from flipping between people and holds position through brief occlusions.',
   ],
   [
-    'Can OpenShorts translate and dub videos?',
+    'Can Clipping AI translate and dub videos?',
     'Yes, with your own ElevenLabs API key, into more than 30 languages, preserving the original speaker\'s voice characteristics. After dubbing, the audio is re-transcribed so the burned-in subtitles are in the target language rather than the original.',
   ],
   [
@@ -104,8 +104,8 @@ const FAQ = [
     'It generates marketing videos with AI actors for any product or business. You describe the business or paste a website URL, and the AI writes a script, generates a lip-synced actor with voiceover, adds b-roll and subtitles, with the hook spoken in the first seconds. Low Cost mode is about $0.65 per video and Premium is about $2.00. It works for restaurants, e-commerce, coaching, local businesses and apps, not only software.',
   ],
   [
-    'Can I automate OpenShorts from Claude, ChatGPT or n8n?',
-    'Yes. OpenShorts has a native MCP server at mcp.openshorts.app/mcp plus a REST API with per-user keys and completion webhooks, so an agent can submit a video URL, wait for processing, list the clips and publish them. The hosted endpoint is always on, with the API key created in your account page; the self-hosted edition serves the same /mcp endpoint while your machine is running. A zero-dependency CLI is on PyPI as openshorts. Full guide at /mcp.',
+    'Can I automate Clipping AI from Claude, ChatGPT or n8n?',
+    'Yes. Clipping AI has a native MCP server at mcp.clippingai.local/mcp plus a REST API with per-user keys and completion webhooks, so an agent can submit a video URL, wait for processing, list the clips and publish them. The hosted endpoint is always on, with the API key created in your account page; the self-hosted edition serves the same /mcp endpoint while your machine is running. A zero-dependency CLI is on PyPI as openshorts. Full guide at /mcp.',
   ],
   [
     'What are the system requirements to self-host?',
@@ -123,10 +123,10 @@ const FAQ = [
  * The site sends no CSP header and index.html already runs inline scripts. */
 const HERO_FORM = `<form id="seo-hero-form" action="/#app" method="get" style="display:flex;flex-wrap:wrap;gap:.6rem;max-width:44rem;margin:0 0 1rem">
     <label for="seo-hero-url" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Video link</label>
-    <input id="seo-hero-url" type="url" name="url" placeholder="Paste a YouTube link" autocomplete="off" style="flex:1 1 18rem;min-width:0;padding:.8rem 1rem;border-radius:10px;border:1px solid oklch(96% 0.006 262 / .16);background:oklch(16.5% 0.015 265);color:oklch(96% 0.006 262);font:inherit;font-size:1rem">
-    <button type="submit" style="padding:.8rem 1.3rem;border-radius:10px;border:0;background:oklch(76% 0.17 50);color:oklch(13% 0.014 265);font:inherit;font-weight:600;cursor:pointer">Get free clips &rarr;</button>
+    <input id="seo-hero-url" type="url" name="url" placeholder="Paste a YouTube link" autocomplete="off" style="flex:1 1 18rem;min-width:0;padding:.8rem 1rem;border-radius:10px;border:1px solid oklch(96% 0.006 262 / .16);background:oklch(15.5% 0.022 258);color:oklch(96% 0.006 262);font:inherit;font-size:1rem">
+    <button type="submit" style="padding:.8rem 1.3rem;border-radius:10px;border:0;background:oklch(64% 0.19 258);color:oklch(12% 0.02 258);font:inherit;font-weight:600;cursor:pointer">Get free clips &rarr;</button>
   </form>
-  <script>(function(){var f=document.getElementById('seo-hero-form');if(!f)return;f.addEventListener('submit',function(e){e.preventDefault();var u=(f.elements.url.value||'').trim();try{if(u)localStorage.setItem('os_pending_url',u);localStorage.setItem('openshorts_skip_landing','1')}catch(_){}location.hash='#app'})})()</script>`
+  <script>(function(){var f=document.getElementById('seo-hero-form');if(!f)return;f.addEventListener('submit',function(e){e.preventDefault();var u=(f.elements.url.value||'').trim();try{if(u)localStorage.setItem('os_pending_url',u);localStorage.setItem('clippingai_skip_landing','1')}catch(_){}location.hash='#app'})})()</script>`
 
 /* Per-platform links, the same ones and in the same order as WORKS_WITH,
  * PLATFORMS and SWITCHING in Landing.jsx. */
@@ -166,7 +166,7 @@ const platformCard = ([title, body, links]) =>
 const card = (title, body) =>
   `<div style="${S.card}"><h3 style="${S.h3}">${title}</h3><p style="margin:0;color:oklch(64% 0.012 262);font-size:.9rem;line-height:1.6">${body}</p></div>`
 
-export const LANDING_FALLBACK = `<div id="seo-content" style="background:oklch(13% 0.014 265);color:oklch(86% 0.01 262);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;line-height:1.65">
+export const LANDING_FALLBACK = `<div id="seo-content" style="background:oklch(12% 0.02 258);color:oklch(86% 0.01 262);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;line-height:1.65">
 <style>${NAV_CSS}</style>
 ${renderNav()}
 ${NAV_SCRIPT}
@@ -189,7 +189,7 @@ ${NAV_SCRIPT}
 </div></section>
 
 <section style="${S.section}"><div style="${S.wrap}">
-  <h2 style="${S.h2}">what openshorts is</h2>
+  <h2 style="${S.h2}">what clipping ai is</h2>
   <p style="${S.p};max-width:48rem">${CANONICAL_ANSWERS.whatIsIt}</p>
   <p style="${S.p};max-width:48rem">${CANONICAL_ANSWERS.howItWorks}</p>
 </div></section>
@@ -197,8 +197,8 @@ ${NAV_SCRIPT}
 <section id="pricing" style="${S.section}"><div style="${S.wrap}">
   <h2 style="${S.h2}">Free plan vs paid: what you actually get</h2>
   <div style="${S.grid};max-width:56rem">
-    ${card('OpenShorts self-hosted &middot; $0', EDITIONS.selfHosted.summary)}
-    ${card('OpenShorts Cloud &middot; free tier, then from $12/month', EDITIONS.cloud.summary)}
+    ${card('Clipping AI self-hosted &middot; $0', EDITIONS.selfHosted.summary)}
+    ${card('Clipping AI Cloud &middot; free tier, then from $12/month', EDITIONS.cloud.summary)}
   </div>
 </div></section>
 
@@ -215,8 +215,8 @@ ${NAV_SCRIPT}
 </div></section>
 
 <section id="comparison" style="${S.section}"><div style="${S.wrap}">
-  <h2 style="${S.h2}">OpenShorts vs Opus Clip, Klap and Vizard</h2>
-  <p style="${S.muted};max-width:48rem">Entry pricing checked 5 October 2026. OpenShorts is $0 self-hosted or $12/month hosted without a watermark, billed monthly. 2short.ai starts at $9.90/month, Submagic at $12, Klap at $14 and Vizard at $14.50 a month on yearly billing, Opus Clip at $15/month and Quso (formerly Vidyo.ai) at $19/month yearly. OpenShorts is the only open source and self-hostable option.</p>
+  <h2 style="${S.h2}">Clipping AI vs Opus Clip, Klap and Vizard</h2>
+  <p style="${S.muted};max-width:48rem">Entry pricing checked 5 October 2026. Clipping AI is $0 self-hosted or $12/month hosted without a watermark, billed monthly. 2short.ai starts at $9.90/month, Submagic at $12, Klap at $14 and Vizard at $14.50 a month on yearly billing, Opus Clip at $15/month and Quso (formerly Vidyo.ai) at $19/month yearly. Clipping AI is the only open source and self-hostable option.</p>
   <h3 style="${S.h3};margin-top:1.5rem">Switching from another tool?</h3>
   <p style="${S.muted}">${SWITCHING.map(link).join(' &middot; ')}</p>
   <p style="${S.muted}">
@@ -249,7 +249,7 @@ ${NAV_SCRIPT}
     <a style="${S.a}" href="/open-source-ai-video-generator">Open source AI video generator</a> &middot;
     <a style="${S.a}" href="/podcast-to-shorts">Podcast clips</a> &middot;
     <a style="${S.a}" href="/youtube-to-shorts-converter">YouTube to Shorts converter</a> &middot;
-    <a style="${S.a}" href="/how-openshorts-works">How it works</a> &middot;
+    <a style="${S.a}" href="/how-clipping-ai-works">How it works</a> &middot;
     <a style="${S.a}" href="/alternatives">All alternatives compared</a> &middot;
     <a style="${S.a}" href="/free-ai-clipping-tools-compared">Free AI clipping tools compared</a> &middot;
     <a style="${S.a}" href="/alternativas">Alternativas (ES)</a> &middot;

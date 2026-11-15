@@ -36,6 +36,18 @@ export default defineConfig({
     ],
     proxy: {
       '/api': { target: backend, changeOrigin: true },
+      // Image generation: free Pollinations models run through the ZES Mesh
+      // Console's proxy (:7070 /api/image), which fetches server-side so the
+      // browser Origin is not rejected. Gemini (BYOK) is called directly —
+      // its API answers CORS. Must precede '/studio': the first matching
+      // proxy wins.
+      '/studio/api/image': {
+        target: 'http://127.0.0.1:7070',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/studio/, '') || '/',
+      },
+      // merged ZES Studio (Pollinations + Remotion) served by :8090
+      '/studio': { target: 'http://127.0.0.1:8090', changeOrigin: true, rewrite: (p) => p.replace(/^\/studio/, '') || '/' },
       '/videos': { target: backend, changeOrigin: true },
       '/thumbnails': { target: backend, changeOrigin: true },
       '/gallery': { target: backend, changeOrigin: true },

@@ -2,18 +2,16 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import declarative_base
-
 from .config import settings
 
 Base = declarative_base()
-
 _engine = None
 _sessionmaker = None
 
-# Columns added to tables that already exist in production. ADD COLUMN IF NOT
-# EXISTS is a no-op on a database that already has them and on a fresh one that
-# create_all just built.
-_ADDITIVE_COLUMNS = (
+# Columns added to tables that already exist in production.
+# For PostgreSQL, use IF NOT EXISTS; for SQLite, we need to check column existence first.
+# These statements are for PostgreSQL only; SQLite handling is done separately.
+_ADDITIVE_COLUMNS_PG = (
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS "
     "marketing_opt_out BOOLEAN NOT NULL DEFAULT false",
     # Nullable, no default: a catalog-only change, no table rewrite.
@@ -29,10 +27,23 @@ _ADDITIVE_COLUMNS = (
     "ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS hold_until TIMESTAMPTZ",
 )
 
+# SQLite-compatible additive columns (without IF NOT EXISTS)
+_ADDITIVE_COLUMNS_SQLITE = (
+    "ALTER TABLE users ADD COLUMN marketing_opt_out BOOLEAN NOT NULL DEFAULT false",
+    "ALTER TABLE users ADD COLUMN free_plan_denied VARCHAR(32)",
+    "CREATE INDEX IF NOT EXISTS ix_usage_job_id ON usage_ledger (job_id)",
+    "ALTER TABLE cancellation_feedback ADD COLUMN outcome VARCHAR(16)",
+    "ALTER TABLE api_keys ADD COLUMN scope TEXT",
+    "ALTER TABLE subscriptions ADD COLUMN hold_from TIMESTAMPTZ",
+    "ALTER TABLE subscriptions ADD COLUMN hold_until TIMESTAMPTZ",
+)
+
+def _is_postgresql(url: str) -> bool:
+    """Check if the database URL is PostgreSQL."""
+    return url.startswith("postgresql") or url.startswith("postgres")
 
 async def init_engine():
     """Create the async engine + sessionmaker and ensure the schema exists.
-
     Uses ``create_all`` for zero-friction boot (additive-only schema in v1).
     Alembic (see ``alembic/``) is available for controlled migrations later.
     """
@@ -41,35 +52,35 @@ async def init_engine():
         return
     # Import models so their tables register on Base.metadata before create_all.
     from . import models  # noqa: F401
-
     _engine = create_async_engine(settings.database_url, pool_pre_ping=True)
     _sessionmaker = async_sessionmaker(_engine, expire_on_commit=False, class_=AsyncSession)
-
     async with _engine.begin() as conn:
-        # Case-insensitive email uniqueness.
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS citext"))
+        # Case-insensitive email uniqueness - only for PostgreSQL
+        if _is_postgresql(settings.database_url):
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS citext"))
         await conn.run_sync(Base.metadata.create_all)
         # create_all creates missing TABLES and never ALTERs an existing one, so
         # a column added to a model that already shipped exists in the code and
         # not in the database. Each statement here is additive and idempotent;
         # keep them that way, and prefer Alembic once one of them is not.
-        for statement in _ADDITIVE_COLUMNS:
+        if _is_postgresql(settings.database_url):
+            statements = _ADDITIVE_COLUMNS_PG
+        else:
+            statements = _ADDITIVE_COLUMNS_SQLITE
+        for statement in statements:
             try:
                 await conn.execute(text(statement))
             except Exception as e:  # pragma: no cover - depends on the server
                 print(f"⚠️  Additive schema step failed ({statement}): {e}")
-
 
 def get_sessionmaker():
     if _sessionmaker is None:
         raise RuntimeError("Cloud DB engine not initialized — call init_engine() first.")
     return _sessionmaker
 
-
 def session():
     """Return a new AsyncSession context manager (for use outside FastAPI deps)."""
     return get_sessionmaker()()
-
 
 async def get_db():
     """FastAPI dependency yielding an AsyncSession."""
