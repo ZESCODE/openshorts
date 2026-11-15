@@ -41,6 +41,22 @@ async def diag() -> dict:
             out[label] = {"status": r.status_code, "ms": int((time.time() - started) * 1000)}
         except Exception as exc:  # noqa: BLE001
             out[label] = {"error": type(exc).__name__, "ms": int((time.time() - started) * 1000)}
+
+    model = os.environ.get("FREE_TOOLS_GEMINI_MODEL", "gemini-3.1-flash-lite")
+    started = time.time()
+    try:
+        r = await httpx.AsyncClient(timeout=60).post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+            headers={"x-goog-api-key": key, "Content-Type": "application/json"},
+            json={
+                "contents": [{"parts": [{"text": "Reply with the single word ok"}]}],
+                "generationConfig": {"maxOutputTokens": 64},
+            },
+        )
+        out["generate"] = {"status": r.status_code, "ms": int((time.time() - started) * 1000),
+                           "body": r.text[:160]}
+    except Exception as exc:  # noqa: BLE001
+        out["generate"] = {"error": type(exc).__name__, "ms": int((time.time() - started) * 1000)}
     return out
 
 
