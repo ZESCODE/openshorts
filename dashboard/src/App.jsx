@@ -328,11 +328,14 @@ function App() {
     return '';
   });
 
-  // fal.ai API State - Load encrypted
-  const [falKey, setFalKey] = useState(() => {
-    const stored = localStorage.getItem('falKey_v1');
-    if (stored) return decrypt(stored);
-    return '';
+  // Pollinations API State - Load encrypted. falKey_v1 is the pre-Pollinations
+  // name, still read so an existing key survives the swap.
+  const [pollinationsKey, setPollinationsKey] = useState(() => {
+    try {
+      const stored = localStorage.getItem('pollinationsKey_v2')
+        || localStorage.getItem('falKey_v1');
+      return stored ? decrypt(stored) : '';
+    } catch (_) { return ''; }
   });
 
   const [uploadUserId, setUploadUserId] = useState(() => localStorage.getItem('uploadUserId') || '');
@@ -782,10 +785,10 @@ function App() {
   }, [elevenLabsKey]);
 
   useEffect(() => {
-    if (falKey) {
-      localStorage.setItem('falKey_v1', encrypt(falKey));
+    if (pollinationsKey) {
+      localStorage.setItem('pollinationsKey_v2', encrypt(pollinationsKey));
     }
-  }, [falKey]);
+  }, [pollinationsKey]);
 
   useEffect(() => {
     if ((uploadPostKey || isManaged) && userProfiles.length === 0) {
@@ -1076,7 +1079,7 @@ function App() {
     finishTutorial();
   };
   // Included in the plan (fully managed, no keys): Clip Generator + YouTube Studio.
-  // Advanced (bring your own fal.ai + ElevenLabs keys): AI Shorts + AI Agent.
+  // Advanced (bring your own Pollinations + ElevenLabs keys): AI Shorts + AI Agent.
   const INCLUDED_TOOL_TABS = ['dashboard', 'thumbnails'];
   const ADVANCED_TOOL_TABS = ['saasshorts', 'ai-agent'];
   const TOOL_NAMES = { dashboard: 'the Clip Generator', thumbnails: 'the YouTube Studio' };
@@ -1732,7 +1735,7 @@ function App() {
         {/* Included tools (Clip Generator, YouTube Studio): non-blocking trial prompt. */}
         {gateThisTab && <TrialGate toolName={TOOL_NAMES[activeTab] || 'this'} />}
 
-        {/* Advanced tools (AI Shorts, AI Agent): BYOK fal.ai + ElevenLabs notice. */}
+        {/* Advanced tools (AI Shorts, AI Agent): BYOK Pollinations + ElevenLabs notice. */}
         {advancedThisTab && <AdvancedBanner needsPlan={needsPlan} onKeys={() => goToTab('settings')} />}
 
         {/* Main Workspace */}
@@ -1766,7 +1769,7 @@ function App() {
                   </div>
                   <p className="text-xs text-muted mb-5 leading-relaxed">
                     Your plan includes the <strong>Clip Generator</strong> and <strong>YouTube Studio</strong>,
-                    fully managed — no API keys required. AI Shorts &amp; dubbing use your own fal.ai / ElevenLabs
+                    fully managed — no API keys required. AI Shorts &amp; dubbing use your own Pollinations / ElevenLabs
                     keys (below). Connect your social accounts to publish directly.
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -1923,24 +1926,25 @@ function App() {
                   <span className="readout">BYOK</span>
                 </div>
                 <p className="text-xs text-muted mb-6 leading-relaxed">
-                  Generate UGC-style videos with AI actors for any product or business using <strong>fal.ai</strong>.
-                  <strong> Not covered by your plan</strong> — bring your own fal.ai + ElevenLabs keys (billed by those
-                  providers, ~$0.65-2 per video). Your plan still covers the AI script &amp; orchestration.
+                  Generate UGC-style videos with AI actors using <strong>Pollinations</strong> (Flux images and
+                  audio-driven video models) plus <strong>ElevenLabs</strong> for the voice.
+                  <strong> Not covered by your plan</strong> — bring your own keys; Pollinations bills the pollen
+                  balance on your account. Your plan still covers the AI script &amp; orchestration.
                 </p>
                 <div className="space-y-4">
-                  <label className="block text-sm text-muted">fal.ai API Key</label>
+                  <label className="block text-sm text-muted">Pollinations API Key</label>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="password"
-                      value={falKey}
-                      onChange={(e) => setFalKey(e.target.value)}
+                      value={pollinationsKey}
+                      onChange={(e) => setPollinationsKey(e.target.value)}
                       className="input-field"
-                      placeholder="fal_..."
+                      placeholder="sk_..."
                     />
                     <button
                       onClick={() => {
-                        if (falKey) {
-                          localStorage.setItem('falKey_v1', encrypt(falKey));
+                        if (pollinationsKey) {
+                          localStorage.setItem('pollinationsKey_v2', encrypt(pollinationsKey));
                           setFalSaved(true);
                           setTimeout(() => setFalSaved(false), 2000);
                         }
@@ -1951,15 +1955,16 @@ function App() {
                     </button>
                   </div>
                   <div className="text-xs text-muted leading-relaxed">
-                    Get your API key from fal.ai to enable AI actor video generation.
+                    Create a Pollinations key to enable AI actor video generation. Requests spend the pollen
+                    balance on that account.
                     <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="p-2 border border-rule rounded-input hover:bg-paper3 transition-colors flex flex-col gap-1">
+                      <a href="https://enter.pollinations.ai" target="_blank" rel="noopener noreferrer" className="p-2 border border-rule rounded-input hover:bg-paper3 transition-colors flex flex-col gap-1">
                         <span className="text-ink2 font-medium">1. Sign Up</span>
-                        <span className="text-xs text-muted">Create fal.ai account</span>
+                        <span className="text-xs text-muted">Create Pollinations account</span>
                       </a>
-                      <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="p-2 border border-rule rounded-input hover:bg-paper3 transition-colors flex flex-col gap-1">
+                      <a href="https://enter.pollinations.ai/keys" target="_blank" rel="noopener noreferrer" className="p-2 border border-rule rounded-input hover:bg-paper3 transition-colors flex flex-col gap-1">
                         <span className="text-ink2 font-medium">2. API Key</span>
-                        <span className="text-xs text-muted">Generate key</span>
+                        <span className="text-xs text-muted">Generate sk_ key</span>
                       </a>
                     </div>
                     <br />
@@ -1974,7 +1979,7 @@ function App() {
 
           {/* View: SaaS Shorts */}
           {activeTab === 'saasshorts' && (
-            <SaaShortsTab geminiApiKey={apiKey} elevenLabsKey={elevenLabsKey} falKey={falKey} uploadPostKey={uploadPostKey} uploadUserId={uploadUserId} managed={isManaged} />
+            <SaaShortsTab geminiApiKey={apiKey} elevenLabsKey={elevenLabsKey} pollinationsKey={pollinationsKey} uploadPostKey={uploadPostKey} uploadUserId={uploadUserId} managed={isManaged} />
           )}
 
           {/* View: AI Agent */}

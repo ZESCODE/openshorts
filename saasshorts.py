@@ -5,10 +5,10 @@ Generates viral TikTok/Instagram Reels content from a SaaS URL.
 Pipeline:
   1. Scrape & analyze SaaS website (Gemini)
   2. Generate video scripts (hook → problem → solution → CTA)
-  3. Generate AI actor portrait (Flux Pro via fal.ai)
+  3. Generate AI actor portrait (Pollinations · flux-2-pro)
   4. Generate voiceover (ElevenLabs TTS)
-  5. Generate talking head video (Kling Avatar v2 via fal.ai)
-  6. Generate b-roll clips (Kling v2.6 via fal.ai)
+  5. Generate talking head video (Pollinations · audio-driven video model)
+  6. Generate b-roll clips (Pollinations · flux-2-pro stills + Ken Burns)
   7. Composite final video with subtitles (FFmpeg)
 """
 
@@ -26,7 +26,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 ELEVENLABS_API_BASE = "https://api.elevenlabs.io/v1"
-FAL_QUEUE_BASE = "https://queue.fal.run"
+
+# Pollinations (gen.pollinations.ai) — the user's own key, sent as a bearer
+# token. Images come back as bytes; video models take a public first-frame URL
+# plus an optional public audio URL for audio-driven (lip-sync-ish) motion.
+POLLINATIONS_BASE = "https://gen.pollinations.ai"
+POLL_IMAGE_MODEL = "black-forest-labs/flux-2-pro"
+POLL_PREMIUM_VIDEO = "minimax/minimax-h3-max"      # 5-15s, 1080p, audio refs
+POLL_LOWCOST_VIDEO = "bytedance/seedance-2.0"      # up to 15s, 720p, audio refs
+POLL_VIDEO_MAX_SECONDS = 14                        # stay under the 15s cap
 
 # Default ElevenLabs voices (name → voice_id)
 DEFAULT_VOICES = {
@@ -37,6 +45,16 @@ DEFAULT_VOICES = {
     "Josh (Male, deep)": "TxGEqnHWrfWFTfGW9XjX",
     "Sam (Male, raspy)": "yoZ06aMxZJJ28mfd3POQ",
 }
+
+
+def _public_url(path: str, builder: Optional[Callable[[str], str]]) -> str:
+    """Pollinations video models fetch the first frame and driving audio by URL."""
+    if builder is None:
+        raise Exception(
+            "Pollinations video models need a public URL for the actor image and "
+            "narration, but this job has no media URL builder."
+        )
+    return builder(path)
 
 
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL_SAAS") or os.environ.get("GEMINI_MODEL") or "gemini-3.1-flash-lite"
@@ -581,128 +599,82 @@ RULES:
 # Phase 2: Asset Generation
 # ═══════════════════════════════════════════════════════════════════════
 
-def _fal_run(model_id: str, input_data: dict, fal_key: str, timeout: int = 600) -> dict:
-    """
-    Submit a job to fal.ai queue, poll for completion, return result.
-    Uses the URLs returned by the submit response (as per fal.ai docs).
-    """
-    headers = {
-        "Authorization": f"Key {fal_key}",
-        "Content-Type": "application/json",
-    }
-
-    # ── Step 1: Submit to queue ──
-    submit_url = f"{FAL_QUEUE_BASE}/{model_id}"
-    print(f"[fal.ai] Submitting to {submit_url}...")
-
-    with httpx.Client(timeout=120.0) as client:
-        resp = client.post(submit_url, headers=headers, json=input_data)
-
+def _poll_get(path: str, params: dict, key: str, timeout: float = 300.0) -> bytes:
+    """GET a Pollinations binary endpoint with the user's bearer key."""
+    url = f"{POLLINATIONS_BASE}{path}"
+    headers = {"Authorization": f"Bearer {key}", "Accept": "*/*"}
+    with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+        resp = client.get(url, params=params, headers=headers)
     if resp.status_code >= 400:
-        print(f"[fal.ai] Submit error: {resp.text[:500]}")
-        raise Exception(f"fal.ai error ({resp.status_code}): {resp.text[:300]}")
-
-    try:
-        submit_data = resp.json()
-    except json.JSONDecodeError:
-        raise Exception(f"fal.ai invalid JSON: {resp.text[:300]}")
-
-    request_id = submit_data.get("request_id")
-    if not request_id:
-        # Synchronous result (no queue)
-        return submit_data
-
-    # Use the URLs from the submit response (guaranteed correct per docs)
-    status_url = submit_data.get("status_url", f"{FAL_QUEUE_BASE}/{model_id}/requests/{request_id}/status")
-    response_url = submit_data.get("response_url", f"{FAL_QUEUE_BASE}/{model_id}/requests/{request_id}")
-
-    print(f"[fal.ai] Queued: {request_id}")
-    print(f"[fal.ai] Status URL: {status_url}")
-
-    # ── Step 2: Poll for completion ──
-    poll_headers = {"Authorization": f"Key {fal_key}"}
-    start = time.time()
-
-    while time.time() - start < timeout:
-        elapsed = int(time.time() - start)
-        try:
-            with httpx.Client(timeout=30.0) as client:
-                poll_resp = client.get(f"{status_url}?logs=1", headers=poll_headers)
-            status_data = poll_resp.json()
-        except Exception as e:
-            print(f"[fal.ai] Poll error (retrying): {e}")
-            time.sleep(5)
-            continue
-
-        status = status_data.get("status", "UNKNOWN")
-
-        if status == "COMPLETED":
-            print(f"[fal.ai] ✅ Completed in {elapsed}s! Fetching result...")
-            with httpx.Client(timeout=120.0) as client:
-                result_resp = client.get(response_url, headers=poll_headers)
-                return result_resp.json()
-
-        elif status in ("FAILED", "CANCELLED"):
-            error = status_data.get("error", "unknown error")
-            raise Exception(f"fal.ai job {status}: {error}")
-
-        # Log progress
-        queue_pos = status_data.get("queue_position", "")
-        pos_info = f" (pos: {queue_pos})" if queue_pos != "" else ""
-        print(f"[fal.ai] {model_id}: {status}{pos_info} ({elapsed}s)")
-        time.sleep(5)
-
-    raise Exception(f"fal.ai job timed out after {timeout}s for {model_id}")
+        detail = resp.text[:400]
+        print(f"[pollinations] {path} error ({resp.status_code}): {detail}")
+        raise Exception(f"Pollinations error ({resp.status_code}): {detail}")
+    return resp.content
 
 
-def _fal_upload_file(file_path: str, fal_key: str) -> str:
-    """Upload a local file to fal.ai CDN storage and return public URL."""
-    headers = {"Authorization": f"Key {fal_key}"}
+def _poll_image(prompt: str, key: str, width: int = 1024, height: int = 1365,
+                seed: Optional[int] = None, model: str = POLL_IMAGE_MODEL) -> bytes:
+    """Text → image bytes (JPEG/PNG) from Pollinations."""
+    params = {"model": model, "width": width, "height": height}
+    if seed is not None:
+        params["seed"] = seed
+    print(f"[pollinations] image · {model} · {width}x{height}")
+    return _poll_get(f"/image/{prompt}", params, key, timeout=300.0)
 
-    filename = os.path.basename(file_path)
-    ext = os.path.splitext(filename)[1].lower()
-    content_types = {
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".mp3": "audio/mpeg",
-        ".wav": "audio/wav",
-        ".mp4": "video/mp4",
-        ".webp": "image/webp",
+
+def _poll_video(prompt: str, key: str, *, image_url: str, audio_url: Optional[str],
+                duration: int, model: str, resolution: str = "720p") -> bytes:
+    """First-frame image (+ optional driving audio) → MP4 bytes."""
+    params = {
+        "model": model,
+        "image": image_url,
+        "duration": max(1, min(int(duration), POLL_VIDEO_MAX_SECONDS)),
+        "resolution": resolution,
     }
-    content_type = content_types.get(ext, "application/octet-stream")
+    if audio_url:
+        params["reference_audios"] = audio_url
+    print(f"[pollinations] video · {model} · {params['duration']}s · {resolution}")
+    return _poll_get(f"/video/{prompt}", params, key, timeout=900.0)
 
-    # Initiate upload
-    with httpx.Client(timeout=30.0) as client:
-        resp = client.post(
-            "https://rest.alpha.fal.ai/storage/upload/initiate",
-            headers={**headers, "Content-Type": "application/json"},
-            json={"file_name": filename, "content_type": content_type},
-        )
-        resp.raise_for_status()
-        upload_info = resp.json()
 
-    upload_url = upload_info["upload_url"]
-    file_url = upload_info["file_url"]
+def _split_audio(audio_path: str, max_seconds: int = POLL_VIDEO_MAX_SECONDS) -> List[str]:
+    """Split a narration into <=max_seconds MP3 chunks so each video call fits
+    the model's duration cap. Returns the chunk paths (empty list = use as-is)."""
+    duration = _get_media_duration(audio_path)
+    if duration <= max_seconds + 0.5:
+        return []
+    chunk_dir = os.path.join(os.path.dirname(audio_path), "_chunks")
+    os.makedirs(chunk_dir, exist_ok=True)
+    pattern = os.path.join(chunk_dir, "part_%02d.mp3")
+    subprocess.run(
+        ["ffmpeg", "-y", "-i", audio_path, "-f", "segment",
+         "-segment_time", str(max_seconds), "-c:a", "libmp3lame", "-b:a", "128k", pattern],
+        check=True, capture_output=True,
+    )
+    parts = sorted(
+        os.path.join(chunk_dir, f) for f in os.listdir(chunk_dir) if f.startswith("part_")
+    )
+    print(f"[pollinations] narration {duration:.1f}s → {len(parts)} chunks")
+    return parts
 
-    # Upload file content
-    with open(file_path, "rb") as f:
-        file_bytes = f.read()
 
-    with httpx.Client(timeout=120.0) as client:
-        resp = client.put(
-            upload_url,
-            content=file_bytes,
-            headers={"Content-Type": content_type},
-        )
-        resp.raise_for_status()
-
-    print(f"[fal.ai] Uploaded {filename} → {file_url}")
-    return file_url
+def _concat_media(paths: List[str], output_path: str) -> str:
+    """Concatenate encoded clips (same codec/size) with the concat demuxer."""
+    list_path = output_path + ".txt"
+    with open(list_path, "w") as fh:
+        for path in paths:
+            fh.write(f"file '{os.path.abspath(path).replace(chr(39), '')}'\n")
+    subprocess.run(
+        ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", list_path,
+         "-c", "copy", output_path],
+        check=True, capture_output=True,
+    )
+    os.remove(list_path)
+    return output_path
 
 
 def generate_actor_images(
-    description: str, fal_key: str, output_dir: str, title_slug: str, num_options: int = 3,
+    description: str, poll_key: str, output_dir: str, title_slug: str, num_options: int = 3,
     product_description: str = None,
 ) -> List[str]:
     """Generate multiple hyper-realistic actor portrait options using Flux 2 Pro."""
@@ -729,26 +701,13 @@ def generate_actor_images(
     paths = []
     # Flux 2 Pro — #1 for photorealistic faces
     def _gen_one(i):
-        result = _fal_run(
-            "fal-ai/flux-2-pro",
-            {
-                "prompt": prompt,
-                "image_size": "portrait_4_3",
-                "safety_tolerance": 5,
-                "seed": random.randint(0, 999999),
-            },
-            fal_key,
-            timeout=300,
-        )
-        images = result.get("images") or result.get("output", [])
-        if not images:
-            raise Exception(f"No images in actor result: {list(result.keys())}")
-        img_url = images[0]["url"] if isinstance(images[0], dict) else images[0]
         img_path = os.path.join(output_dir, f"{title_slug}_actor_option_{i}.png")
-        with httpx.Client(timeout=60.0) as client:
-            img_resp = client.get(img_url)
-            with open(img_path, "wb") as f:
-                f.write(img_resp.content)
+        data = _poll_image(
+            prompt, poll_key, width=1024, height=768,
+            seed=random.randint(0, 999999),
+        )
+        with open(img_path, "wb") as f:
+            f.write(data)
         print(f"[SaaSShorts] ✅ Actor option {i+1}: {img_path}")
         return img_path
 
@@ -773,12 +732,12 @@ def generate_actor_images(
 
 
 def generate_actor_image(
-    description: str, fal_key: str, output_path: str
+    description: str, poll_key: str, output_path: str
 ) -> str:
     """Generate a single actor image using Recraft V4."""
     output_dir = os.path.dirname(output_path)
     title_slug = os.path.basename(output_path).replace("_actor.png", "")
-    paths = generate_actor_images(description, fal_key, output_dir, title_slug, num_options=1)
+    paths = generate_actor_images(description, poll_key, output_dir, title_slug, num_options=1)
     if paths:
         import shutil
         shutil.move(paths[0], output_path)
@@ -852,132 +811,75 @@ def get_elevenlabs_voices(elevenlabs_key: str) -> list:
 # Phase 3: Video Generation
 # ═══════════════════════════════════════════════════════════════════════
 
-def generate_talking_head(
-    image_path: str,
-    audio_path: str,
-    fal_key: str,
-    output_path: str,
-) -> str:
-    """Generate talking head video using Kling Avatar v2 Standard on fal.ai."""
-    print(f"[SaaSShorts] 🗣️ Generating talking head (Kling Avatar v2)...")
+def _generate_head(image_path: str, audio_path: str, key: str, output_path: str,
+                    model: str, resolution: str,
+                    public_url: Optional[Callable[[str], str]] = None,
+                    log: Callable[[str], None] = print) -> str:
+    """Talking head from a still + narration, via a Pollinations audio-driven
+    video model. Long narrations are split so each call fits the model's
+    duration cap, then concatenated."""
+    image_url = _public_url(image_path, public_url)
+    parts = _split_audio(audio_path) or [audio_path]
 
-    # Upload image and audio to fal.ai CDN
-    image_url = _fal_upload_file(image_path, fal_key)
-    audio_url = _fal_upload_file(audio_path, fal_key)
+    clips = []
+    for index, part in enumerate(parts):
+        part_duration = _get_media_duration(part)
+        audio_url = _public_url(part, public_url)
+        clip = output_path.replace(".mp4", f"_part{index}.mp4")
+        log(f"  talking head · part {index + 1}/{len(parts)} ({part_duration:.1f}s)")
+        data = _poll_video(
+            "Natural UGC creator talking to camera, expressive and energetic, "
+            "subtle head movements and natural blinking, eye contact with the lens.",
+            key,
+            image_url=image_url,
+            audio_url=audio_url,
+            duration=int(part_duration) + 1,
+            model=model,
+            resolution=resolution,
+        )
+        with open(clip, "wb") as fh:
+            fh.write(data)
+        clips.append(clip)
 
-    result = _fal_run(
-        "fal-ai/kling-video/ai-avatar/v2/standard",
-        {
-            "image_url": image_url,
-            "audio_url": audio_url,
-            "prompt": (
-                "Natural UGC creator talking to camera. Expressive and energetic. "
-                "Subtle hand gestures to emphasize points. Slight head movements and nods. "
-                "Occasional leaning forward for emphasis. Relaxed shoulders, casual vibe. "
-                "Maintain eye contact with camera. Natural blinking and micro-expressions."
-            ),
-        },
-        fal_key,
-        timeout=600,
-    )
-
-    video_url = result["video"]["url"]
-
-    # Download video
-    with httpx.Client(timeout=180.0) as client:
-        vid_resp = client.get(video_url)
-        with open(output_path, "wb") as f:
-            f.write(vid_resp.content)
+    if len(clips) == 1:
+        os.replace(clips[0], output_path)
+    else:
+        _concat_media(clips, output_path)
+        for clip in clips:
+            os.remove(clip)
 
     print(f"[SaaSShorts] ✅ Talking head: {output_path}")
     return output_path
 
 
+def generate_talking_head(
+    image_path: str,
+    audio_path: str,
+    poll_key: str,
+    output_path: str,
+    public_url: Optional[Callable[[str], str]] = None,
+) -> str:
+    """Premium talking head: Pollinations mini-max H3 (1080p, audio-driven)."""
+    print("[SaaSShorts] 🗣️ Generating talking head (premium · minimax-h3-max)...")
+    return _generate_head(image_path, audio_path, poll_key, output_path,
+                          POLL_PREMIUM_VIDEO, "1080p", public_url)
+
+
 def generate_talking_head_lowcost(
     image_path: str,
     audio_path: str,
-    fal_key: str,
+    poll_key: str,
     output_path: str,
+    public_url: Optional[Callable[[str], str]] = None,
 ) -> str:
-    """
-    Low-cost talking head: Hailuo 2.3 Fast img2video → VEED Lipsync.
-    ~$0.39 vs ~$1.69 for Kling Avatar v2.
-    """
-    print(f"[SaaSShorts] 🗣️ Generating talking head (Low Cost: Hailuo + VEED Lipsync)...")
-
-    # Step 1: Generate 6s video from image using MiniMax Hailuo 2.3 Fast ($0.19)
-    # Cache the Hailuo clip so retries don't re-generate it
-    hailuo_cache_path = output_path.replace(".mp4", "_hailuo_cache.mp4")
-
-    if os.path.exists(hailuo_cache_path) and os.path.getsize(hailuo_cache_path) > 0:
-        print(f"[SaaSShorts]   Hailuo clip cached, skipping generation.")
-        hailuo_video_url = _fal_upload_file(hailuo_cache_path, fal_key)
-    else:
-        image_url = _fal_upload_file(image_path, fal_key)
-
-        hailuo_result = _fal_run(
-            "fal-ai/minimax/hailuo-2.3-fast/standard/image-to-video",
-            {
-                "image_url": image_url,
-                "prompt": (
-                    "Person talking to camera, subtle head nods and natural micro-expressions. "
-                    "Gentle head movement, slight shoulder sway. Eye contact with camera. "
-                    "Natural blinking. Soft ambient lighting. Smooth cinematic motion."
-                ),
-            },
-            fal_key,
-            timeout=300,
-        )
-
-        print(f"[SaaSShorts]   Hailuo response keys: {list(hailuo_result.keys())}")
-        if "video" in hailuo_result:
-            hailuo_video_url = hailuo_result["video"]["url"] if isinstance(hailuo_result["video"], dict) else hailuo_result["video"]
-        elif "video_url" in hailuo_result:
-            hailuo_video_url = hailuo_result["video_url"]
-        elif "output" in hailuo_result:
-            hailuo_video_url = hailuo_result["output"]["url"] if isinstance(hailuo_result["output"], dict) else hailuo_result["output"]
-        else:
-            raise Exception(f"No video in Hailuo result: {hailuo_result}")
-
-        # Save Hailuo clip locally for retry cache
-        with httpx.Client(timeout=180.0) as client:
-            vid_resp = client.get(hailuo_video_url)
-            with open(hailuo_cache_path, "wb") as f:
-                f.write(vid_resp.content)
-
-        print(f"[SaaSShorts]   Hailuo 2.3 Fast 6s clip ready (cached for retry).")
-
-    # Step 2: Upload audio for lip-sync
-    audio_url = _fal_upload_file(audio_path, fal_key)
-
-    # Step 3: VEED Lipsync — high quality lip-sync with loop ($0.20 for 30s)
-    lipsync_result = _fal_run(
-        "veed/lipsync",
-        {
-            "video_url": hailuo_video_url,
-            "audio_url": audio_url,
-        },
-        fal_key,
-        timeout=900,
-    )
-
-    print(f"[SaaSShorts]   VEED Lipsync response keys: {list(lipsync_result.keys())}")
-    if "video" in lipsync_result:
-        lipsync_video_url = lipsync_result["video"]["url"] if isinstance(lipsync_result["video"], dict) else lipsync_result["video"]
-    else:
-        raise Exception(f"No video in VEED Lipsync result: {lipsync_result}")
-
-    with httpx.Client(timeout=180.0) as client:
-        vid_resp = client.get(lipsync_video_url)
-        with open(output_path, "wb") as f:
-            f.write(vid_resp.content)
-
-    print(f"[SaaSShorts] ✅ Talking head (low cost): {output_path}")
-    return output_path
+    """Low-cost talking head: Pollinations Seedance 2.0 (720p, audio-driven)."""
+    print("[SaaSShorts] 🗣️ Generating talking head (low cost · seedance-2.0)...")
+    return _generate_head(image_path, audio_path, poll_key, output_path,
+                          POLL_LOWCOST_VIDEO, "720p", public_url)
 
 
 def generate_broll(
-    prompt: str, fal_key: str, output_path: str, duration: str = "5"
+    prompt: str, poll_key: str, output_path: str, duration: str = "5"
 ) -> str:
     """
     Generate b-roll: Recraft V4 image + Ken Burns zoom effect via FFmpeg.
@@ -987,28 +889,13 @@ def generate_broll(
     dur_secs = int(duration)
     img_path = output_path.replace(".mp4", "_img.png")
 
-    # Step 1: Generate a high-quality still image with Flux 2 Pro
-    result = _fal_run(
-        "fal-ai/flux-2-pro",
-        {
-            "prompt": f"{prompt}. Cinematic, shallow depth of field, professional photography.",
-            "image_size": "portrait_4_3",
-            "safety_tolerance": 5,
-        },
-        fal_key,
-        timeout=300,
+    # Step 1: Generate a high-quality still image (Pollinations · Flux 2 Pro)
+    data = _poll_image(
+        f"{prompt}. Cinematic, shallow depth of field, professional photography.",
+        poll_key, width=1024, height=768,
     )
-
-    # Flux 2 Pro returns images in "images" or "output" key
-    images = result.get("images") or result.get("output", [])
-    if not images:
-        raise Exception(f"No images in b-roll result: {list(result.keys())}")
-    img_url = images[0]["url"] if isinstance(images[0], dict) else images[0]
-
-    with httpx.Client(timeout=60.0) as client:
-        img_resp = client.get(img_url)
-        with open(img_path, "wb") as f:
-            f.write(img_resp.content)
+    with open(img_path, "wb") as f:
+        f.write(data)
 
     # Step 2: Ken Burns effect — slow zoom in with slight pan
     fps = 30
@@ -1332,7 +1219,7 @@ def generate_full_video(
     Args:
         script: A single script object from generate_scripts()
         config: {
-            "fal_key": str,
+            "poll_key": str,
             "elevenlabs_key": str,
             "voice_id": str (optional),
             "actor_description": str (optional, overrides script),
@@ -1345,7 +1232,7 @@ def generate_full_video(
     """
     os.makedirs(output_dir, exist_ok=True)
 
-    fal_key = config["fal_key"]
+    poll_key = config["poll_key"]
     elevenlabs_key = config["elevenlabs_key"]
     voice_id = config.get("voice_id", "21m00Tcm4TlvDq8ikWAM")
     actor_desc = config.get("actor_description") or script.get("actor_description", "a young professional in their late 20s, wearing a casual modern outfit, clean background")
@@ -1388,7 +1275,7 @@ def generate_full_video(
         log(f"[1/6] Generating {' + '.join(tasks)} (parallel)...")
 
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future_img = executor.submit(generate_actor_image, actor_desc, fal_key, actor_img) if need_img else None
+            future_img = executor.submit(generate_actor_image, actor_desc, poll_key, actor_img) if need_img else None
             future_voice = executor.submit(
                 generate_voiceover, full_narration, elevenlabs_key, audio_path, voice_id
             ) if need_voice else None
@@ -1408,10 +1295,14 @@ def generate_full_video(
     if not _exists(talking_head):
         if video_mode == "lowcost":
             log("[3/6] Generating talking head (Low Cost: Hailuo + VEED Lipsync)... This takes 2-5 minutes.")
-            talking_head = generate_talking_head_lowcost(actor_img, audio_path, fal_key, talking_head)
+            talking_head = generate_talking_head_lowcost(
+                actor_img, audio_path, poll_key, talking_head, config.get("public_url")
+            )
         else:
             log("[3/6] Generating talking head video (Kling Avatar v2)... This takes 2-5 minutes.")
-            talking_head = generate_talking_head(actor_img, audio_path, fal_key, talking_head)
+            talking_head = generate_talking_head(
+                actor_img, audio_path, poll_key, talking_head, config.get("public_url")
+            )
         log("[3/6] Talking head ready.")
     else:
         log("[3/6] ✅ Talking head cached, skipping.")
@@ -1444,7 +1335,7 @@ def generate_full_video(
                 futures = {}
                 for i, seg, broll_path in broll_to_generate:
                     future = executor.submit(
-                        generate_broll, seg["broll_prompt"], fal_key, broll_path
+                        generate_broll, seg["broll_prompt"], poll_key, broll_path
                     )
                     futures[future] = {"seg": seg, "path": broll_path}
 
@@ -1480,26 +1371,15 @@ def generate_full_video(
 
     log("🎉 Video generation complete!")
 
-    # Cost estimate
+    # Usage estimate. Pollinations bills the user's own pollen balance, and its
+    # per-model rates change, so report what was consumed rather than a dollar
+    # figure that would be wrong the moment a rate moves.
     audio_duration = _get_media_duration(audio_path)
-    if video_mode == "lowcost":
-        cost = {
-            "actor_image_flux": 0.05,
-            "voiceover_elevenlabs": round(len(full_narration) * 0.00003, 3),
-            "hailuo_img2video": 0.19,
-            "veed_lipsync": 0.20,
-            "broll_flux": round(len(broll_clips) * 0.05, 2),
-            "ffmpeg_compositing": 0.00,
-        }
-    else:
-        cost = {
-            "actor_image_flux": 0.05,
-            "voiceover_elevenlabs": round(len(full_narration) * 0.00003, 3),
-            "talking_head_kling": round(audio_duration * 0.056, 2),
-            "broll_kling": round(len(broll_clips) * 5 * 0.07, 2),
-            "ffmpeg_compositing": 0.00,
-        }
-    cost["total"] = round(sum(cost.values()), 2)
+    cost = {
+        "currency": "pollen",
+        "video_seconds": round(audio_duration),
+        "broll_clips": len(broll_clips),
+    }
 
     return {
         "video_path": final_path,

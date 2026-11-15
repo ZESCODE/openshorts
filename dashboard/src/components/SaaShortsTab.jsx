@@ -40,9 +40,9 @@ function saveCache(url, analysis, webResearch, scripts) {
   } catch { /* localStorage full */ }
 }
 
-export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uploadPostKey, uploadUserId, managed = false }) {
+export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, pollinationsKey, uploadPostKey, uploadUserId, managed = false }) {
   // Managed (hosted plan): Gemini (script) + Upload-Post run server-side via the
-  // bearer token — no BYOK Gemini key needed. fal.ai + ElevenLabs stay BYOK.
+  // bearer token — no BYOK Gemini key needed. Pollinations + ElevenLabs stay BYOK.
   const geminiHeader = geminiApiKey ? { 'X-Gemini-Key': geminiApiKey } : {};
   const needsGeminiKey = !geminiApiKey && !managed;
   // Wizard state
@@ -264,8 +264,8 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
   };
 
   const handleGenerate = async () => {
-    if (!falKey) {
-      alert('fal.ai API key required. Set it in Settings.');
+    if (!pollinationsKey) {
+      alert('Pollinations API key required. Set it in Settings.');
       return;
     }
     if (!elevenLabsKey) {
@@ -292,7 +292,7 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Fal-Key': falKey,
+          'X-Pollinations-Key': pollinationsKey,
           'X-ElevenLabs-Key': elevenLabsKey,
         },
         body: JSON.stringify({
@@ -339,7 +339,7 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Fal-Key': falKey,
+          'X-Pollinations-Key': pollinationsKey,
           'X-ElevenLabs-Key': elevenLabsKey,
         },
         body: JSON.stringify({
@@ -1014,14 +1014,14 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
 
                 <button
                   onClick={async () => {
-                    if (!falKey || !actorDescription) return;
+                    if (!pollinationsKey || !actorDescription) return;
                     setGeneratingActors(true);
                     setActorOptions([]);
                     setSelectedActor(null);
                     try {
                       const res = await apiFetch('/api/saasshorts/actor-options', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-Fal-Key': falKey },
+                        headers: { 'Content-Type': 'application/json', 'X-Pollinations-Key': pollinationsKey },
                         body: JSON.stringify({ actor_description: actorDescription, num_options: 3 }),
                       });
                       if (res.ok) {
@@ -1037,7 +1037,7 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
                     } catch (e) { console.error(e); }
                     finally { setGeneratingActors(false); }
                   }}
-                  disabled={generatingActors || !falKey || !actorDescription}
+                  disabled={generatingActors || !pollinationsKey || !actorDescription}
                   className="btn-ghost mt-2 w-full py-2.5 text-sm"
                 >
                   {generatingActors ? <><Loader2 size={14} className="animate-spin" /> Generating 3 actors...</> : <><User size={14} /> {actorOptions.length > 0 ? 'Regenerate actors' : 'Generate 3 new actors'} <span className="readout">~$0.06</span></>}
@@ -1121,10 +1121,10 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
               </div>
 
               {/* Missing keys warning */}
-              {(!falKey || !elevenLabsKey) && (
+              {(!pollinationsKey || !elevenLabsKey) && (
                 <div className="p-3 bg-warn/10 rounded-input flex items-center gap-2 text-sm text-warn">
                   <AlertCircle size={14} />
-                  {!falKey && 'fal.ai API key missing. '}{!elevenLabsKey && 'ElevenLabs API key missing. '}
+                  {!pollinationsKey && 'Pollinations API key missing. '}{!elevenLabsKey && 'ElevenLabs API key missing. '}
                   Set them in Settings.
                 </div>
               )}
@@ -1151,7 +1151,7 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
               </button>
               <button
                 onClick={handleGenerate}
-                disabled={!falKey || !elevenLabsKey || !selectedActor || generating}
+                disabled={!pollinationsKey || !elevenLabsKey || !selectedActor || generating}
                 className="btn-primary px-6 py-2 text-sm"
               >
                 {generating ? (
@@ -1306,15 +1306,17 @@ export default function SaaShortsTab({ geminiApiKey, elevenLabsKey, falKey, uplo
                     <div className="card p-4">
                       <div className="eyebrow mb-2">Cost Breakdown</div>
                       <div className="space-y-1">
-                        {Object.entries(genResult.cost_estimate).filter(([k]) => k !== 'total').map(([k, v]) => (
-                          <div key={k} className="flex justify-between readout">
-                            <span>{k.replace(/_/g, ' ')}</span>
-                            <span>${v}</span>
-                          </div>
-                        ))}
+                        {Object.entries(genResult.cost_estimate)
+                          .filter(([k]) => !['total', 'currency'].includes(k))
+                          .map(([k, v]) => (
+                            <div key={k} className="flex justify-between readout">
+                              <span>{k.replace(/_/g, ' ')}</span>
+                              <span>{v}</span>
+                            </div>
+                          ))}
                         <div className="flex justify-between readout text-ink border-t border-rule pt-1.5 mt-1.5">
-                          <span>Total</span>
-                          <span>${genResult.cost_estimate.total}</span>
+                          <span>Billed to</span>
+                          <span>your Pollinations balance</span>
                         </div>
                       </div>
                     </div>

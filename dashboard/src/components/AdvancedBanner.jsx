@@ -1,7 +1,7 @@
 import React from 'react';
 import { KeyRound, ArrowRight } from 'lucide-react';
 
-// Banner for advanced tools (AI Shorts, AI Agent) that use fal.ai + ElevenLabs.
+// Banner for advanced tools (AI Shorts, AI Agent) that use Pollinations + ElevenLabs.
 // These are BYOK: the plan covers the script/orchestration, the user brings their
 // own keys for the premium generation. If they have no plan yet, also nudge trial.
 export default function AdvancedBanner({ needsPlan, onKeys }) {
@@ -12,8 +12,8 @@ export default function AdvancedBanner({ needsPlan, onKeys }) {
         <div className="text-ink2 lowercase leading-relaxed min-w-0">
           <span className="font-medium text-ink">Advanced tool.</span>{' '}
           {needsPlan
-            ? <>Sign in with <span className="font-medium text-ink">Google</span> to unlock free. This tool also uses your own <span className="font-medium text-ink normal-case">fal.ai + ElevenLabs</span> keys (you pay those providers).</>
-            : <>AI video &amp; voice generation use your own <span className="font-medium text-ink normal-case">fal.ai + ElevenLabs</span> keys — add them in Settings. Script &amp; orchestration are included in your plan.</>}
+            ? <>Sign in with <span className="font-medium text-ink">Google</span> to unlock free. This tool also uses your own <span className="font-medium text-ink normal-case">Pollinations + ElevenLabs</span> keys (you pay those providers).</>
+            : <>AI video &amp; voice generation use your own <span className="font-medium text-ink normal-case">Pollinations + ElevenLabs</span> keys — add them in Settings. Script &amp; orchestration are included in your plan.</>}
         </div>
       </div>
       <button

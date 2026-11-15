@@ -9598,13 +9598,15 @@ async def saasshorts_actor_upload(request: Request, file: UploadFile = File(...)
 async def saasshorts_actor_options(
     req: SaaSActorRequest,
     request: Request,
-    x_fal_key: Optional[str] = Header(None, alias="X-Fal-Key"),
+    x_poll_key: Optional[str] = Header(None, alias="X-Pollinations-Key"),
+    x_legacy_key: Optional[str] = Header(None, alias="X-Fal-Key"),
 ):
     """Generate multiple actor image options for the user to choose from."""
     await require_managed_entitlement(request)
-    fal_key = x_fal_key
+    # X-Fal-Key is the pre-Pollinations name; honoured so an open tab keeps working.
+    fal_key = x_poll_key or x_legacy_key
     if not fal_key:
-        raise HTTPException(status_code=400, detail="Missing fal.ai API Key")
+        raise HTTPException(status_code=400, detail="Missing Pollinations API Key")
 
     try:
         job_id = str(uuid.uuid4())
@@ -10028,16 +10030,17 @@ class SaaSGenerateRequest(BaseModel):
 async def saasshorts_generate(
     req: SaaSGenerateRequest,
     request: Request,
-    x_fal_key: Optional[str] = Header(None, alias="X-Fal-Key"),
+    x_poll_key: Optional[str] = Header(None, alias="X-Pollinations-Key"),
+    x_legacy_key: Optional[str] = Header(None, alias="X-Fal-Key"),
     x_elevenlabs_key: Optional[str] = Header(None, alias="X-ElevenLabs-Key"),
 ):
     """Generate a SaaS UGC video from a script. Returns a job_id for polling."""
     await require_managed_entitlement(request)
-    fal_key = x_fal_key
+    fal_key = x_poll_key or x_legacy_key
     elevenlabs_key = x_elevenlabs_key
 
     if not fal_key:
-        raise HTTPException(status_code=400, detail="Missing fal.ai API Key (X-Fal-Key header)")
+        raise HTTPException(status_code=400, detail="Missing Pollinations API Key (X-Pollinations-Key header)")
     if not elevenlabs_key:
         raise HTTPException(status_code=400, detail="Missing ElevenLabs API Key (X-ElevenLabs-Key header)")
 
@@ -10139,8 +10142,19 @@ async def saasshorts_generate(
             if src and os.path.exists(src):
                 selected_actor_path = src
 
+    # Pollinations video models pull the first frame and the driving audio by
+    # URL, so hand them signed links to this job's own /videos files.
+    media_base = _upload_url_base(request)
+    media_segment = os.path.basename(job_output_dir)
+
+    def _job_public_url(path: str) -> str:
+        return _signed_media_url(
+            f"/videos/{media_segment}/{os.path.basename(path)}", media_base
+        )
+
     config = {
-        "fal_key": fal_key,
+        "poll_key": fal_key,
+        "public_url": _job_public_url,
         "elevenlabs_key": elevenlabs_key,
         "voice_id": req.voice_id or "21m00Tcm4TlvDq8ikWAM",
         "actor_description": req.actor_description,
