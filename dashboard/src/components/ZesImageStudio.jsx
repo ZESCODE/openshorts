@@ -1,17 +1,23 @@
 import React, { useCallback, useState } from 'react';
+import { hasAppKey, pollenKey as pollenStore, startConnect } from '../lib/pollinations';
 
 /**
- * Image Studio — two ways in:
- *  - Pollinations (free, no key): same-origin proxy path through the ZES Mesh
- *    Console's /api/image on :7070, which fetches server-side because
- *    image.pollinations.ai rejects a browser Origin with 403.
+ * Image Studio — three ways in:
+ *  - Pollinations, free: same-origin proxy (VITE_IMAGE_PROXY, default
+ *    /studio/api/image) because image.pollinations.ai rejects a browser Origin.
+ *  - Pollinations, your Pollen (BYOP): the user authorizes this app
+ *    (Pollinations Pay) or pastes their own sk_ key; the proxy forwards it to
+ *    gen.pollinations.ai and the request spends that user's Pollen. The key
+ *    lives in sessionStorage for the tab only.
  *  - Gemini (your key): the image models answer CORS, so the browser calls
  *    generativelanguage.googleapis.com directly with the api_key already in
  *    localStorage from the rest of the dashboard (BYOK, nothing relayed).
  */
 
+const IMAGE_PROXY = import.meta.env.VITE_IMAGE_PROXY || '/studio/api/image';
+
 const PROVIDERS = [
-  { id: 'pollinations', label: 'Pollinations · free, no key' },
+  { id: 'pollinations', label: 'Pollinations · free or your pollen' },
   { id: 'gemini', label: 'Gemini · your key' },
 ];
 
@@ -42,6 +48,11 @@ const readKey = () => {
   try { return localStorage.getItem('gemini_key') || ''; } catch (_) { return ''; }
 };
 
+// Pollen keys are tab-scoped on purpose: never localStorage, and
+// sessionStorage is dropped when the tab closes.
+const readPollenKey = pollenStore.get;
+const writePollenKey = (value) => (value ? pollenStore.set(value) : pollenStore.clear());
+
 const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => resolve(reader.result);
@@ -49,10 +60,12 @@ const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
   reader.readAsDataURL(blob);
 });
 
-async function generatePollinations(prompt, model, size) {
-  const url = `/studio/api/image?prompt=${encodeURIComponent(prompt)}&model=${model}`
+async function generatePollinations(prompt, model, size, pollenKey = '') {
+  const url = `${IMAGE_PROXY}?prompt=${encodeURIComponent(prompt)}&model=${model}`
     + `&width=${size.w}&height=${size.h}`;
-  const res = await fetch(url);
+  const res = await fetch(url, pollenKey
+    ? { headers: { Authorization: `Bearer ${pollenKey}` } }
+    : undefined);
   if (!res.ok) {
     let detail = `Upstream ${res.status}`;
     try { const j = await res.json(); detail = j.detail || j.error || detail; } catch { /* binary body */ }
@@ -119,11 +132,26 @@ export default function ZesImageStudio({ geminiApiKey = '' }) {
   const [prompt, setPrompt] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [pollenKey, setPollenKey] = useState(readPollenKey);
+  const [pollenDraft, setPollenDraft] = useState('');
   const [images, setImages] = useState([]); // {url, model, label, prompt} — newest first
 
   const models = provider === 'gemini' ? GEMINI_MODELS : POLLINATIONS_MODELS;
   const activeModel = models.some((m) => m.id === model) ? model : models[0].id;
   const key = geminiApiKey || readKey();
+
+  const connect = async () => {
+    try { await startConnect(); } catch (e) { setError(String(e.message || e)); }
+  };
+
+  const savePollenKey = () => {
+    const value = pollenDraft.trim();
+    if (!value.startsWith('sk_')) { setError('A Pollen key starts with sk_ — copy it from enter.pollinations.ai/keys.'); return; }
+    writePollenKey(value);
+    setPollenKey(value);
+    setPollenDraft('');
+    setError('');
+  };
 
   const generate = useCallback(async () => {
     if (!prompt.trim()) { setError('Prompt required'); return; }
@@ -136,7 +164,7 @@ export default function ZesImageStudio({ geminiApiKey = '' }) {
       const picked = SIZES[size];
       const out = provider === 'gemini'
         ? await generateGemini(prompt, activeModel, picked, key.trim())
-        : await generatePollinations(prompt, activeModel, picked);
+        : await generatePollinations(prompt, activeModel, picked, pollenKey);
       const url = URL.createObjectURL(out.blob);
       const dims = out.w ? `${out.w}×${out.h}` : picked.ratio;
       setImages((prev) => [{ url, model: out.model, label: dims, prompt, provider }, ...prev].slice(0, 12));
@@ -145,7 +173,7 @@ export default function ZesImageStudio({ geminiApiKey = '' }) {
     } finally {
       setBusy(false);
     }
-  }, [prompt, provider, activeModel, size, key]);
+  }, [prompt, provider, activeModel, size, key, pollenKey]);
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-5">
@@ -196,7 +224,34 @@ export default function ZesImageStudio({ geminiApiKey = '' }) {
           <p className="text-sm text-warn">No Gemini key yet — add one in the API keys card first.</p>
         )}
         {provider === 'pollinations' && (
-          <p className="text-sm text-ink3">Runs through <code className="font-mono">localhost:7070/api/image</code>, free with no key.</p>
+          pollenKey ? (
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span className="text-ok">Pollen connected · this spends your own balance</span>
+              <button
+                onClick={() => { writePollenKey(''); setPollenKey(''); }}
+                className="text-ink3 hover:text-ink underline text-xs"
+              >Disconnect</button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-ink3">
+                Free requests work as-is. To spend your own Pollen you approve this app on Pollinations, or connect a key from{' '}
+                <a href="https://enter.pollinations.ai/keys" target="_blank" rel="noreferrer" className="underline">enter.pollinations.ai/keys</a>.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {hasAppKey && (
+                  <button onClick={connect} className="btn-primary">Connect with Pollinations</button>
+                )}
+                <input
+                  value={pollenDraft}
+                  onChange={(e) => setPollenDraft(e.target.value)}
+                  placeholder="sk_…"
+                  className="input-field flex-1 min-w-[16rem] font-mono text-sm"
+                />
+                <button onClick={savePollenKey} className="btn-ghost">Connect key</button>
+              </div>
+            </div>
+          )
         )}
         {error && <p className="text-sm text-danger">{error}</p>}
       </div>

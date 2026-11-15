@@ -35,6 +35,13 @@ export default defineConfig({
       'www.openshorts.app'
     ],
     proxy: {
+      // Pollinations OAuth token exchange — server-side because
+      // enter.pollinations.ai sends no CORS headers. The whop app (:3020)
+      // owns the JSON→form conversion. Must precede '/api'.
+      '/api/pollinations/token': {
+        target: process.env.VITE_TOKEN_TARGET || 'http://127.0.0.1:3020',
+        changeOrigin: true,
+      },
       '/api': { target: backend, changeOrigin: true },
       // Image generation: free Pollinations models run through the ZES Mesh
       // Console's proxy (:7070 /api/image), which fetches server-side so the

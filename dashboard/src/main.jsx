@@ -10,6 +10,7 @@ import LoginModal from './components/LoginModal'
 import { readPendingPlan } from './lib/pendingPlan'
 import { track } from './lib/analytics'
 import { applyConsent } from './lib/consent'
+import { completeConnect } from './lib/pollinations'
 import CookieBanner from './components/CookieBanner'
 
 const App = lazy(() => import('./App.jsx'))
@@ -155,6 +156,9 @@ captureAttribution();
 // Start whatever the visitor previously agreed to. Nothing at all on a first
 // visit: index.html only publishes the analytics initialiser, it never runs it.
 applyConsent();
+
+// Pollinations Pay return leg: exchanges ?code for the user's sk_ key (if any).
+completeConnect().catch(() => { /* the Image Studio surfaces token errors */ });
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
