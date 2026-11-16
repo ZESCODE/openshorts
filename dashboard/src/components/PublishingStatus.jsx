@@ -28,6 +28,8 @@ export default function PublishingStatus({ onConnect }) {
     setState('loading');
     try {
       const data = await apiJson('/api/social/user');
+      // configured:false means this host has no publishing key (or no route).
+      if (data?.configured === false) { setState('unavailable'); return; }
       const list = data?.profiles || [];
       setProfiles(list);
       const first = list[0];
