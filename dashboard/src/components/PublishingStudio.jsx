@@ -14,7 +14,7 @@ const PRIVACY = [
   { id: 'public', label: 'Public' },
 ];
 
-export default function PublishingStudio() {
+export default function PublishingStudio({ uploadPostKey = '' }) {
   const [profile, setProfile] = useState(null);
   const [jobId, setJobId] = useState('');
   const [clips, setClips] = useState([]);
@@ -30,7 +30,9 @@ export default function PublishingStudio() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/social/user')
+    fetch('/api/social/user', uploadPostKey
+      ? { headers: { 'X-Upload-Post-Key': uploadPostKey } }
+      : undefined)
       .then((r) => r.json())
       .then((d) => {
         const p = d.profiles?.[0];
@@ -148,7 +150,7 @@ export default function PublishingStudio() {
         )}
       </div>
 
-      <PublishingStatus onConnect={() => window.open('/user', '_blank', 'noopener')} />
+      <PublishingStatus uploadPostKey={uploadPostKey} onConnect={() => window.open('/user', '_blank', 'noopener')} />
 
       {/* clip source */}
       <section className="bg-paper2 border border-rule rounded-card p-4 space-y-3">

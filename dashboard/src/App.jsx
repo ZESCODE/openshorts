@@ -2167,7 +2167,7 @@ function App() {
           )}
           {activeTab === 'publishing' && (
             <div className="h-full overflow-y-auto custom-scrollbar animate-fade">
-              <PublishingStudio />
+              <PublishingStudio uploadPostKey={uploadPostKey} uploadUserId={uploadUserId} />
             </div>
           )}
           {activeTab === 'thumbnails' && (

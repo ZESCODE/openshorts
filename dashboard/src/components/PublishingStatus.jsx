@@ -18,16 +18,21 @@ const TILES = [
   ['comments', 'comments'],
 ];
 
-export default function PublishingStatus({ onConnect }) {
+export default function PublishingStatus({ onConnect, uploadPostKey = '' }) {
   const [state, setState] = useState('loading'); // loading | ready | empty | unavailable | error
   const [profiles, setProfiles] = useState([]);
   const [metrics, setMetrics] = useState({});
   const [asOf, setAsOf] = useState('');
 
   const load = useCallback(async () => {
+    // No key of their own: the status would be the server account's, not
+    // theirs, so the card stays out of the way.
+    if (!uploadPostKey) { setState('unavailable'); return; }
     setState('loading');
     try {
-      const data = await apiJson('/api/social/user');
+      const data = await apiJson('/api/social/user', uploadPostKey
+        ? { headers: { 'X-Upload-Post-Key': uploadPostKey } }
+        : undefined);
       // configured:false means this host has no publishing key (or no route).
       if (data?.configured === false) { setState('unavailable'); return; }
       const list = data?.profiles || [];
@@ -45,7 +50,7 @@ export default function PublishingStatus({ onConnect }) {
       // 401 = outside the Whop iframe, 404 = no route (self-hosted without it).
       setState(status === 401 || status === 404 ? 'unavailable' : 'error');
     }
-  }, []);
+  }, [uploadPostKey]);
 
   useEffect(() => { load(); }, [load]);
 
