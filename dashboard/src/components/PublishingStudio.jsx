@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import PublishingStatus from './PublishingStatus';
 
 /**
  * Publishing Studio — upload-posting finish clips to every connected platform
@@ -146,6 +147,8 @@ export default function PublishingStudio() {
           </div>
         )}
       </div>
+
+      <PublishingStatus onConnect={() => window.open('/user', '_blank', 'noopener')} />
 
       {/* clip source */}
       <section className="bg-paper2 border border-rule rounded-card p-4 space-y-3">
