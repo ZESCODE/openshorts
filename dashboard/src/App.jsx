@@ -1367,6 +1367,10 @@ function App() {
     { id: 'zes-video', ord: '08', icon: Film, label: 'Video Studio', short: 'video', primary: true },
     { id: 'publishing', ord: '09', icon: Send, label: 'Publishing', short: 'publish', primary: true },
     ...(billingEnabled && isSignedIn ? [{ id: 'history', ord: '07', icon: History, label: 'History', short: 'history' }] : []),
+    { id: 'social-accounts', ord: '10', icon: Users, label: 'Accounts', short: 'accounts', href: '/user' },
+    { id: 'social-upload', ord: '11', icon: Upload, label: 'Upload & schedule', short: 'upload', href: '/upload' },
+    { id: 'social-calendar', ord: '12', icon: Calendar, label: 'Calendar', short: 'calendar', href: '/calendar' },
+    { id: 'social-analytics', ord: '13', icon: Activity, label: 'Analytics', short: 'analytics', href: '/analytics' },
     { id: 'settings', ord: '08', icon: Settings, label: 'Settings', short: 'settings' },
   ];
   const activeNav = navItems.find((n) => n.id === activeTab);
@@ -1387,44 +1391,17 @@ function App() {
   };
   const tabLocked = (id) => tutorialLock && id !== 'dashboard';
 
-  // Shared footer links (landing, the publishing pages, pricing) — same list
-  // in the desktop rail and the mobile drawer, so they can never drift apart.
-  const NavFooterLinks = ({ collapsed = false }) => {
-    const link = "flex items-center gap-2 px-3 py-2 text-xs lowercase text-muted hover:text-ink2 transition-colors";
-    const label = (text) => (
-      <span className={collapsed ? 'hidden lg:block truncate' : 'truncate'}>{text}</span>
-    );
-    return (
-      <>
-        <a href="#landing" className={link}>
-          <Globe size={14} className="shrink-0" />
-          {label('landing page')}
-        </a>
-        <a href="/user" className={link}>
-          <Users size={14} className="shrink-0" />
-          {label('accounts')}
-        </a>
-        <a href="/upload" className={link}>
-          <Upload size={14} className="shrink-0" />
-          {label('upload & schedule')}
-        </a>
-        <a href="/calendar" className={link}>
-          <Calendar size={14} className="shrink-0" />
-          {label('calendar')}
-        </a>
-        <a href="/analytics" className={link}>
-          <Activity size={14} className="shrink-0" />
-          {label('analytics')}
-        </a>
-        {billingEnabled && (
-          <a href="#/pricing" className={link}>
-            <Sparkles size={14} className="shrink-0" />
-            {label('plans & pricing')}
-          </a>
-        )}
-      </>
-    );
-  };
+  // The one link that leaves the app for the marketing site. The publishing
+  // pages moved into the nav above Settings, so the footer stays a single row.
+  const NavFooterLinks = ({ collapsed = false }) => (
+    <a
+      href="#landing"
+      className="flex items-center gap-2 px-3 py-2 text-xs lowercase text-muted hover:text-ink2 transition-colors"
+    >
+      <Globe size={14} className="shrink-0" />
+      <span className={collapsed ? 'hidden lg:block truncate' : 'truncate'}>landing page</span>
+    </a>
+  );
 
   // Desktop rail: icon-only from md, labelled from lg. Below md it is gone
   // entirely — an unlabelled 80px rail ate a fifth of a phone screen.
@@ -1441,6 +1418,30 @@ function App() {
         {navItems.map((item) => {
           const NavIcon = item.icon;
           const isActive = activeTab === item.id;
+          const inner = (
+            <>
+              {isActive && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-brass rounded-full" aria-hidden="true" />
+              )}
+              <NavIcon size={18} className={`shrink-0 ${isActive ? 'text-brass' : ''}`} />
+              <span className="text-sm lowercase hidden lg:block flex-1 text-left truncate">{item.label}</span>
+              {item.href
+                ? <ExternalLink size={12} className="shrink-0 hidden lg:block opacity-60" />
+                : tabLocked(item.id)
+                  ? <Lock size={12} className="shrink-0 hidden lg:block" />
+                  : item.byok ? <span className="readout hidden lg:block">BYOK</span>
+                    : item.isNew ? <span className="badge-brass hidden lg:block">new</span> : null}
+              <span className="readout hidden lg:block">{item.ord}</span>
+            </>
+          );
+          const cls = `relative w-full flex items-center gap-3 px-3 py-2.5 rounded-input transition-colors ${isActive ? 'bg-paper3 text-ink' : 'text-muted hover:text-ink2 hover:bg-paper3/50'}`;
+          if (item.href) {
+            return (
+              <a key={item.id} href={item.href} title={item.label} className={cls}>
+                {inner}
+              </a>
+            );
+          }
           return (
             <button
               key={item.id}
@@ -1448,18 +1449,9 @@ function App() {
               onClick={() => goToTab(item.id)}
               title={tabLocked(item.id) ? 'Finish your first clips to unlock' : item.label}
               disabled={tabLocked(item.id)}
-              className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-input transition-colors ${isActive ? 'bg-paper3 text-ink' : 'text-muted hover:text-ink2 hover:bg-paper3/50'} ${tabLocked(item.id) ? 'opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted' : ''}`}
+              className={`${cls} ${tabLocked(item.id) ? 'opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted' : ''}`}
             >
-              {isActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-brass rounded-full" aria-hidden="true" />
-              )}
-              <NavIcon size={18} className={`shrink-0 ${isActive ? 'text-brass' : ''}`} />
-              <span className="text-sm lowercase hidden lg:block flex-1 text-left truncate">{item.label}</span>
-              {tabLocked(item.id)
-                ? <Lock size={12} className="shrink-0 hidden lg:block" />
-                : item.byok ? <span className="readout hidden lg:block">BYOK</span>
-                  : item.isNew ? <span className="badge-brass hidden lg:block">new</span> : null}
-              <span className="readout hidden lg:block">{item.ord}</span>
+              {inner}
             </button>
           );
         })}
@@ -1505,6 +1497,25 @@ function App() {
           {navItems.map((item) => {
             const NavIcon = item.icon;
             const isActive = activeTab === item.id;
+            const inner = (
+              <>
+                {isActive && (
+                  <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-brass rounded-full" aria-hidden="true" />
+                )}
+                <NavIcon size={18} className={`shrink-0 ${isActive ? 'text-brass' : ''}`} />
+                <span className="text-[0.95rem] lowercase flex-1 text-left truncate">{item.label}</span>
+                {item.href
+                  ? <ExternalLink size={12} className="shrink-0 opacity-60" />
+                  : tabLocked(item.id)
+                    ? <Lock size={12} className="shrink-0" />
+                    : item.byok ? <span className="readout shrink-0">BYOK</span>
+                      : item.isNew ? <span className="badge-brass shrink-0">new</span> : null}
+              </>
+            );
+            const cls = `relative w-full flex items-center gap-3 px-3 py-3 rounded-input transition-colors ${isActive ? 'bg-paper3 text-ink' : 'text-muted active:bg-paper3/60'}`;
+            if (item.href) {
+              return <a key={item.id} href={item.href} className={cls}>{inner}</a>;
+            }
             return (
               <button
                 key={item.id}
@@ -1512,17 +1523,9 @@ function App() {
                 disabled={tabLocked(item.id)}
                 aria-current={isActive ? 'page' : undefined}
                 title={tabLocked(item.id) ? 'Finish your first clips to unlock' : undefined}
-                className={`relative w-full flex items-center gap-3 px-3 py-3 rounded-input transition-colors ${isActive ? 'bg-paper3 text-ink' : 'text-muted active:bg-paper3/60'} ${tabLocked(item.id) ? 'opacity-40 cursor-not-allowed' : ''}`}
+                className={`${cls} ${tabLocked(item.id) ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
-                {isActive && (
-                  <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-brass rounded-full" aria-hidden="true" />
-                )}
-                <NavIcon size={18} className={`shrink-0 ${isActive ? 'text-brass' : ''}`} />
-                <span className="text-[0.95rem] lowercase flex-1 text-left truncate">{item.label}</span>
-                {tabLocked(item.id)
-                  ? <Lock size={12} className="shrink-0" />
-                  : item.byok ? <span className="readout shrink-0">BYOK</span>
-                    : item.isNew ? <span className="badge-brass shrink-0">new</span> : null}
+                {inner}
               </button>
             );
           })}
